@@ -380,7 +380,7 @@ function InternalPortal() {
                         })
                       }
                       disabled={mutation.isPending}
-                      className="min-w-[8rem] rounded-full border border-foreground/15 bg-background/60 px-3 py-2 pr-4 text-xs font-medium text-foreground/80 outline-none transition-colors focus:border-gold disabled:opacity-50"
+                      className="w-[6.75rem] rounded-full border border-foreground/15 bg-background/60 px-2.5 py-2 pr-3 text-xs font-medium text-foreground/80 outline-none transition-colors focus:border-gold disabled:opacity-50"
                     >
                       <option value="">Tilldela personal</option>
                       {STAFF_MEMBERS.map((s) => (
