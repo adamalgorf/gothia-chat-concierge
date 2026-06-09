@@ -273,18 +273,23 @@ function InternalPortal() {
             const Icon = meta.icon;
             const isDone = t.status === "done";
             const pending = mutation.isPending && mutation.variables?.id === t.id;
+            const priority = getPriority(t);
+            const prio = PRIORITY_META[priority];
+            const PrioIcon = prio.icon;
             return (
               <article
                 key={t.id}
                 className={`group relative overflow-hidden rounded-2xl border transition-all ${
                   isDone
                     ? "border-foreground/10 bg-foreground/[0.02] opacity-70"
-                    : "border-foreground/10 bg-foreground/[0.04] hover:border-gold/30 hover:bg-foreground/[0.06]"
+                    : priority === "high"
+                      ? "border-rose-400/30 bg-rose-400/[0.04] hover:border-rose-400/50 hover:bg-rose-400/[0.07]"
+                      : "border-foreground/10 bg-foreground/[0.04] hover:border-gold/30 hover:bg-foreground/[0.06]"
                 }`}
               >
-                {/* Status stripe */}
+                {/* Priority stripe */}
                 <span
-                  className={`absolute left-0 top-0 h-full w-1 ${STATUS_DOT[t.status] ?? "bg-foreground/30"}`}
+                  className={`absolute left-0 top-0 h-full w-1 ${isDone ? "bg-foreground/20" : prio.stripe}`}
                   aria-hidden
                 />
 
@@ -308,12 +313,22 @@ function InternalPortal() {
                           {meta.label}
                         </span>
                         <span
+                          className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] ${prio.chip} ${
+                            priority === "high" && !isDone ? "animate-pulse" : ""
+                          }`}
+                          title={prio.label}
+                        >
+                          <PrioIcon className="h-3 w-3" strokeWidth={2.5} />
+                          {prio.label}
+                        </span>
+                        <span
                           className={`inline-flex items-center gap-1.5 rounded-full bg-foreground/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-foreground/70`}
                         >
                           <span className={`h-1.5 w-1.5 rounded-full ${STATUS_DOT[t.status] ?? "bg-foreground/40"}`} />
                           {STATUS_LABEL[t.status] ?? t.status}
                         </span>
                       </div>
+
 
                       <p className="mt-2 text-sm leading-relaxed text-foreground/85 sm:text-[15px]">{t.details}</p>
 
