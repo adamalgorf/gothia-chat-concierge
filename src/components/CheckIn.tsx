@@ -111,19 +111,37 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
                 </button>
               )}
 
-              <button
-                type="button"
-                onClick={() => setMode("checkin")}
-                className="group relative flex flex-1 items-center justify-between gap-4 overflow-hidden rounded-full border border-foreground/25 bg-foreground/5 px-7 py-5 text-left backdrop-blur-md transition-all hover:border-gold/60 hover:bg-foreground/10 active:scale-[0.98] sm:max-w-[220px]"
-              >
-                <div className="flex items-center gap-3">
-                  <KeyRound className="h-5 w-5 text-gold" strokeWidth={2} />
-                  <span className="text-sm font-semibold uppercase tracking-wider text-foreground">
-                    Checka in
-                  </span>
-                </div>
-                <ArrowUpRight className="h-5 w-5 text-foreground/70 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-gold" />
-              </button>
+              {!storedRoom && (
+                <button
+                  type="button"
+                  onClick={() => setMode("checkin")}
+                  className="group relative flex flex-1 items-center justify-between gap-4 overflow-hidden rounded-full bg-gold px-7 py-5 text-left shadow-[0_10px_40px_-12px_rgba(202,168,99,0.6)] ring-1 ring-gold/40 transition-all hover:bg-gold-bright active:scale-[0.98] sm:max-w-[240px]"
+                >
+                  <div className="flex items-center gap-3">
+                    <KeyRound className="h-5 w-5 text-gold-foreground" strokeWidth={2} />
+                    <span className="text-sm font-semibold uppercase tracking-wider text-gold-foreground">
+                      Checka in
+                    </span>
+                  </div>
+                  <ArrowUpRight className="h-5 w-5 text-gold-foreground transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </button>
+              )}
+
+              {storedRoom && (
+                <button
+                  type="button"
+                  onClick={() => setMode("checkin")}
+                  className="group relative flex flex-1 items-center justify-between gap-4 overflow-hidden rounded-full border border-foreground/25 bg-foreground/5 px-7 py-5 text-left backdrop-blur-md transition-all hover:border-gold/60 hover:bg-foreground/10 active:scale-[0.98] sm:max-w-[220px]"
+                >
+                  <div className="flex items-center gap-3">
+                    <KeyRound className="h-5 w-5 text-gold" strokeWidth={2} />
+                    <span className="text-sm font-semibold uppercase tracking-wider text-foreground">
+                      Checka in
+                    </span>
+                  </div>
+                  <ArrowUpRight className="h-5 w-5 text-foreground/70 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-gold" />
+                </button>
+              )}
 
               <button
                 type="button"
