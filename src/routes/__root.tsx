@@ -92,6 +92,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content: "Lyxig digital concierge för hotellgäster på Gothia Towers.",
       },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Gothia Towers · Guest AI Receptionist" },
+      { name: "description", content: "Gothia Concierge AI is a mobile-first web app for hotel guests to interact with hotel services." },
+      { property: "og:description", content: "Gothia Concierge AI is a mobile-first web app for hotel guests to interact with hotel services." },
+      { name: "twitter:description", content: "Gothia Concierge AI is a mobile-first web app for hotel guests to interact with hotel services." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/cc829f57-1877-4bc9-a4cc-181a3a0312a8/id-preview-81ab0687--833b2d03-05c6-47ac-99b9-bf8d7f6b2d5b.lovable.app-1781012783120.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/cc829f57-1877-4bc9-a4cc-181a3a0312a8/id-preview-81ab0687--833b2d03-05c6-47ac-99b9-bf8d7f6b2d5b.lovable.app-1781012783120.png" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
