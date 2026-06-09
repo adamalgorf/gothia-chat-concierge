@@ -170,6 +170,9 @@ function InternalPortal() {
       filter === "open" ? all.filter(isOpen) : filter === "done" ? all.filter((t) => t.status === "done") : all;
     return [...list].sort((a, b) => {
       if (isOpen(a) !== isOpen(b)) return isOpen(a) ? -1 : 1;
+      const pa = PRIORITY_META[getPriority(a)].sort;
+      const pb = PRIORITY_META[getPriority(b)].sort;
+      if (pa !== pb) return pa - pb;
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
   }, [all, filter]);
