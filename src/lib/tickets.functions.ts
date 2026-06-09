@@ -5,21 +5,21 @@ const STAFF = ["Anna", "Erik", "Sara", "Johan", "Maja"] as const;
 
 export const STAFF_MEMBERS = STAFF;
 
+type JsonValue = string | number | boolean | null | JsonValue[] | { [k: string]: JsonValue };
+
 export type Ticket = {
   id: string;
   room_number: string;
   transaction_type: string;
   details: string;
-  items: unknown;
+  items: JsonValue;
   status: string;
   assigned_to: string | null;
   created_at: string;
   updated_at: string;
 };
 
-type TicketRow = Omit<Ticket, "items"> & { items: unknown };
-
-export const listTickets = createServerFn({ method: "GET" }).handler(async (): Promise<TicketRow[]> => {
+export const listTickets = createServerFn({ method: "GET" }).handler(async (): Promise<Ticket[]> => {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data, error } = await supabaseAdmin
     .from("guest_transactions")
@@ -32,13 +32,14 @@ export const listTickets = createServerFn({ method: "GET" }).handler(async (): P
     room_number: r.room_number,
     transaction_type: r.transaction_type,
     details: r.details,
-    items: JSON.parse(JSON.stringify(r.items ?? null)),
+    items: (r.items ?? null) as JsonValue,
     status: r.status,
     assigned_to: r.assigned_to,
     created_at: r.created_at,
     updated_at: r.updated_at,
   }));
 });
+
 
 const UpdateSchema = z.object({
   id: z.string().uuid(),
