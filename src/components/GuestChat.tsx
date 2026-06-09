@@ -8,6 +8,7 @@ interface GuestChatProps {
   roomNumber: string;
   initialMessages: UIMessage[];
   onBookingConfirmed?: (bookingNumber: string) => void;
+  autoPrompt?: string;
 }
 
 // Minimal typing for browser SpeechRecognition
@@ -39,7 +40,7 @@ const SUGGESTIONS = [
   "Restaurangrekommendation",
 ];
 
-export function GuestChat({ roomNumber, initialMessages, onBookingConfirmed }: GuestChatProps) {
+export function GuestChat({ roomNumber, initialMessages, onBookingConfirmed, autoPrompt }: GuestChatProps) {
   const roomRef = useRef(roomNumber);
   useEffect(() => {
     roomRef.current = roomNumber;
@@ -106,6 +107,16 @@ export function GuestChat({ roomNumber, initialMessages, onBookingConfirmed }: G
       }
     }
   }, [messages, onBookingConfirmed]);
+
+  // Auto-send an initial prompt (e.g. trigger booking flow) on mount
+  const autoSentRef = useRef(false);
+  useEffect(() => {
+    if (autoSentRef.current) return;
+    if (!autoPrompt) return;
+    if (messages.length > 0) return;
+    autoSentRef.current = true;
+    sendMessage({ text: autoPrompt });
+  }, [autoPrompt, messages.length, sendMessage]);
 
   const send = (text: string) => {
     const trimmed = text.trim();
