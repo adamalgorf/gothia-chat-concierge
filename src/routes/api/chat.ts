@@ -136,7 +136,7 @@ export const Route = createFileRoute("/api/chat")({
           },
         });
 
-        const tools: Record<string, ReturnType<typeof tool>> = isGuest
+        const tools: ToolSet = isGuest
           ? { book_hotel_service: bookHotelService }
           : {
               request_housekeeping: tool({
