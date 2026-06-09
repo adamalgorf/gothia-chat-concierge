@@ -3,12 +3,15 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import {
+  AlertTriangle,
   ArrowLeft,
+  ArrowUp,
   BedDouble,
   Brush,
   Check,
   ClipboardList,
   Coffee,
+  Minus,
   RotateCcw,
   Sparkles,
   UserPlus2,
