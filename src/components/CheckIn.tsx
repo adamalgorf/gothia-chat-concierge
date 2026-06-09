@@ -6,7 +6,7 @@ interface CheckInProps {
   onGuestMode: () => void;
 }
 
-export function CheckIn({ onCheckIn }: CheckInProps) {
+export function CheckIn({ onCheckIn, onGuestMode }: CheckInProps) {
   const [room, setRoom] = useState("");
   const [error, setError] = useState<string | null>(null);
 
