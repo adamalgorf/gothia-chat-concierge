@@ -74,6 +74,7 @@ function timeAgo(iso: string) {
 
 function InternalPortal() {
   const fetchTickets = useServerFn(listTickets);
+  const fetchGuests = useServerFn(listActiveGuests);
   const patchTicket = useServerFn(updateTicket);
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<Filter>("open");
@@ -83,6 +84,20 @@ function InternalPortal() {
     queryFn: () => fetchTickets(),
     refetchInterval: 5000,
   });
+
+  const guestsQuery = useQuery({
+    queryKey: ["internal-guests"],
+    queryFn: () => fetchGuests(),
+    refetchInterval: 15000,
+  });
+
+  const guestsByRoom = useMemo(() => {
+    const map = new Map<string, { name: string; email: string; phone: string }>();
+    for (const g of guestsQuery.data ?? []) {
+      map.set(g.room_number, { name: g.full_name, email: g.email, phone: g.phone });
+    }
+    return map;
+  }, [guestsQuery.data]);
 
   const mutation = useMutation({
     mutationFn: (vars: { id: string; status?: string; assigned_to?: string | null }) =>
