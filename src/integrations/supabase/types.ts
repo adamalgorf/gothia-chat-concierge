@@ -38,6 +38,68 @@ export type Database = {
         }
         Relationships: []
       }
+      checklist_completions: {
+        Row: {
+          checked_at: string
+          checked_by: string | null
+          day: string
+          id: string
+          item_index: number
+          template_id: string
+        }
+        Insert: {
+          checked_at?: string
+          checked_by?: string | null
+          day?: string
+          id?: string
+          item_index: number
+          template_id: string
+        }
+        Update: {
+          checked_at?: string
+          checked_by?: string | null
+          day?: string
+          id?: string
+          item_index?: number
+          template_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checklist_completions_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "checklist_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      checklist_templates: {
+        Row: {
+          created_at: string
+          id: string
+          items: Json
+          role: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          items?: Json
+          role: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          items?: Json
+          role?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       guest_profiles: {
         Row: {
           booking_reference: string | null
@@ -109,6 +171,39 @@ export type Database = {
           room_number?: string
           status?: string
           transaction_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      rooms: {
+        Row: {
+          assigned_cleaner: string | null
+          created_at: string
+          floor: number | null
+          last_cleaned_at: string | null
+          notes: string | null
+          room_number: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_cleaner?: string | null
+          created_at?: string
+          floor?: number | null
+          last_cleaned_at?: string | null
+          notes?: string | null
+          room_number: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_cleaner?: string | null
+          created_at?: string
+          floor?: number | null
+          last_cleaned_at?: string | null
+          notes?: string | null
+          room_number?: string
+          status?: string
           updated_at?: string
         }
         Relationships: []
