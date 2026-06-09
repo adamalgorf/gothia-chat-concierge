@@ -137,6 +137,7 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
     setError(null);
     setBooking("");
     setCheckOutRoom("");
+    setGuestRoomInput("");
   };
 
   return (
