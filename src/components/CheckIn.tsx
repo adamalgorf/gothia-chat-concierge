@@ -247,6 +247,25 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
               <button
                 type="button"
                 onClick={() => {
+                  setError(null);
+                  if (storedRoom) setGuestRoomInput(storedRoom);
+                  setMode("guestroom");
+                }}
+                className="group relative flex flex-1 items-center justify-between gap-3 overflow-hidden rounded-full border border-foreground/25 bg-foreground/5 px-5 py-4 text-left backdrop-blur-md transition-all hover:border-gold/60 hover:bg-foreground/10 active:scale-[0.98] sm:max-w-[200px]"
+              >
+                <div className="flex items-center gap-3">
+                  <DoorOpen className="h-5 w-5 text-gold" strokeWidth={2} />
+                  <span className="text-sm font-semibold uppercase tracking-wider text-foreground">
+                    Gästrum
+                  </span>
+                </div>
+                <ArrowUpRight className="h-5 w-5 text-foreground/70 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-gold" />
+              </button>
+
+
+              <button
+                type="button"
+                onClick={() => {
                   setMode("checkout");
                   if (storedRoom) setCheckOutRoom(storedRoom);
                 }}
