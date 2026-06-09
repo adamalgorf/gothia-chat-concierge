@@ -39,6 +39,13 @@ export const saveGuestProfile = createServerFn({ method: "POST" })
       .eq("room_number", data.room_number)
       .is("checked_out_at", null);
 
+    // Fresh stay = fresh chat. Clear any leftover chat history for this room
+    // so a new guest never sees the previous guest's conversation.
+    await supabaseAdmin
+      .from("chat_messages")
+      .delete()
+      .eq("room_number", data.room_number);
+
     const { data: inserted, error } = await supabaseAdmin
       .from("guest_profiles")
       .insert({
