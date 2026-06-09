@@ -33,6 +33,7 @@ function Index() {
   const [room, setRoom] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const [checkInNotice, setCheckInNotice] = useState<string | null>(null);
+  const [autoPrompt, setAutoPrompt] = useState<string | undefined>(undefined);
 
   // Resolve room: URL param > localStorage
   useEffect(() => {
@@ -58,10 +59,12 @@ function Index() {
 
   const handleCheckIn = (r: string) => {
     localStorage.setItem(STORAGE_KEY, r);
+    setAutoPrompt(undefined);
     setRoom(r);
   };
 
   const handleGuestMode = () => {
+    setAutoPrompt("Hej! Jag vill boka ett rum.");
     setRoom("guest");
   };
 
