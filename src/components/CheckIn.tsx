@@ -1,7 +1,15 @@
 import { useState } from "react";
-import { ArrowUpRight, CheckCircle2, CreditCard, KeyRound, LogOut, Sparkles } from "lucide-react";
+import { ArrowUpRight, CheckCircle2, CreditCard, KeyRound, LogOut, Smartphone, Sparkles } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
 import heroImage from "@/assets/hero-towers.jpg";
+
+const KEY_BASE_URL = "https://key.gothiatowers.app/unlock";
+
+function derivePin(room: string): string {
+  const hash = Array.from(room).reduce((a, c) => a * 31 + c.charCodeAt(0), 7);
+  return String(Math.abs(hash) % 10000).padStart(4, "0");
+}
 
 interface CheckInProps {
   storedRoom: string | null;
