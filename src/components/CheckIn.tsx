@@ -171,6 +171,9 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
     setMode("choose");
     setError(null);
     setBooking("");
+    setGuestName("");
+    setGuestEmail("");
+    setGuestPhone("");
     setCheckOutRoom("");
   };
 
