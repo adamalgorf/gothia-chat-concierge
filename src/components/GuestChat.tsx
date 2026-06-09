@@ -163,11 +163,16 @@ export function GuestChat({ roomNumber, initialMessages }: GuestChatProps) {
           })}
 
           {status === "submitted" && (
-            <div className="flex justify-start">
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-gold/70" />
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-gold/70 [animation-delay:150ms]" />
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-gold/70 [animation-delay:300ms]" />
+            <div className="flex justify-start animate-fade-in">
+              <div className="flex items-center gap-2.5 rounded-2xl border border-gold/20 bg-surface/70 px-3.5 py-2.5">
+                <div className="flex items-center gap-1">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-gold/80" />
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-gold/80 [animation-delay:150ms]" />
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-gold/80 [animation-delay:300ms]" />
+                </div>
+                <span className="text-[11px] uppercase tracking-[0.2em] text-gold/70">
+                  AI-receptionisten skriver
+                </span>
               </div>
             </div>
           )}
