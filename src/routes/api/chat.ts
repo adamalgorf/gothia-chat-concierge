@@ -65,7 +65,7 @@ export const Route = createFileRoute("/api/chat")({
               room_number: roomNumber,
               transaction_type: input.transaction_type,
               details: input.details,
-              items: input.items ?? [],
+              items: (input.items ?? []) as unknown as never,
               status: "pending",
             })
             .select("id")
