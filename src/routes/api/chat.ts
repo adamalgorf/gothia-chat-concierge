@@ -83,7 +83,7 @@ export const Route = createFileRoute("/api/chat")({
         }
 
         const gateway = createLovableAiGatewayProvider(key);
-        const model = gateway("google/gemini-3-flash-preview");
+        const model = gateway("openai/gpt-5.5");
 
         const saveTransaction = async (input: {
           transaction_type: "WORK_REQUEST" | "DEBITERA_MINIBAR" | "HOTEL_SERVICE";
