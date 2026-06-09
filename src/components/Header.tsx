@@ -1,4 +1,7 @@
-import { LogOut } from "lucide-react";
+import { LogOut, QrCode } from "lucide-react";
+import { useState } from "react";
+import { QRCodeSVG } from "qrcode.react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 interface HeaderProps {
   roomNumber: string;
@@ -8,6 +11,12 @@ interface HeaderProps {
 
 export function Header({ roomNumber, onCheckOut, onNavigateHome }: HeaderProps) {
   const isGuest = roomNumber === "guest";
+  const [qrOpen, setQrOpen] = useState(false);
+
+  const chatUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/?room=${roomNumber}`
+      : `/?room=${roomNumber}`;
 
   return (
     <header className="sticky top-0 z-20 border-b border-border/60 bg-background/70 backdrop-blur-xl">
@@ -42,6 +51,20 @@ export function Header({ roomNumber, onCheckOut, onNavigateHome }: HeaderProps) 
             </span>
           </div>
 
+          {/* QR — only when checked in */}
+          {!isGuest && (
+            <button
+              onClick={() => setQrOpen(true)}
+              className="flex items-center gap-1.5 rounded-full border border-foreground/15 bg-foreground/5 px-3 py-1.5 text-foreground/70 backdrop-blur-md transition-all hover:border-gold/50 hover:bg-foreground/10 hover:text-gold active:scale-[0.97]"
+              title="Visa QR-kod för rummet"
+            >
+              <QrCode className="h-3.5 w-3.5" strokeWidth={1.75} />
+              <span className="hidden text-[10px] font-medium uppercase tracking-[0.3em] sm:inline">
+                QR
+              </span>
+            </button>
+          )}
+
           {/* Log out — pill, hairline gold */}
           <button
             onClick={onCheckOut}
@@ -55,6 +78,30 @@ export function Header({ roomNumber, onCheckOut, onNavigateHome }: HeaderProps) 
           </button>
         </div>
       </div>
+
+      <Dialog open={qrOpen} onOpenChange={setQrOpen}>
+        <DialogContent className="max-w-sm border-gold/30 bg-background">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl font-light tracking-wide">
+              Concierge i rum <span className="text-gold">{roomNumber}</span>
+            </DialogTitle>
+            <DialogDescription className="text-xs text-foreground/60">
+              Skanna QR-koden — finns på skrivbordet och på TV:n i rummet — för att öppna chatten direkt på din mobil.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center gap-4 py-2">
+            <div className="rounded-xl bg-white p-4 shadow-[0_8px_30px_-12px_rgba(202,168,99,0.5)]">
+              <QRCodeSVG value={chatUrl} size={208} level="M" bgColor="#ffffff" fgColor="#0a0a0a" />
+            </div>
+            <p className="text-center text-[10px] uppercase tracking-[0.3em] text-foreground/50 break-all">
+              {chatUrl}
+            </p>
+            <p className="text-center text-xs text-foreground/70">
+              Beställ room service, frukost, städning eller boka spa — direkt från sängen.
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </header>
   );
 }
