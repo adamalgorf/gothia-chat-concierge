@@ -38,6 +38,36 @@ export type Database = {
         }
         Relationships: []
       }
+      guest_transactions: {
+        Row: {
+          created_at: string
+          details: string
+          id: string
+          items: Json
+          room_number: string
+          status: string
+          transaction_type: string
+        }
+        Insert: {
+          created_at?: string
+          details: string
+          id?: string
+          items?: Json
+          room_number: string
+          status?: string
+          transaction_type: string
+        }
+        Update: {
+          created_at?: string
+          details?: string
+          id?: string
+          items?: Json
+          room_number?: string
+          status?: string
+          transaction_type?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
