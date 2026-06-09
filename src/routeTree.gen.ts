@@ -9,10 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as InternalRouteImport } from './routes/internal'
 import { Route as GastrumRouteImport } from './routes/gastrum'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 
+const InternalRoute = InternalRouteImport.update({
+  id: '/internal',
+  path: '/internal',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GastrumRoute = GastrumRouteImport.update({
   id: '/gastrum',
   path: '/gastrum',
@@ -32,35 +38,46 @@ const ApiChatRoute = ApiChatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/gastrum': typeof GastrumRoute
+  '/internal': typeof InternalRoute
   '/api/chat': typeof ApiChatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/gastrum': typeof GastrumRoute
+  '/internal': typeof InternalRoute
   '/api/chat': typeof ApiChatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/gastrum': typeof GastrumRoute
+  '/internal': typeof InternalRoute
   '/api/chat': typeof ApiChatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/gastrum' | '/api/chat'
+  fullPaths: '/' | '/gastrum' | '/internal' | '/api/chat'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/gastrum' | '/api/chat'
-  id: '__root__' | '/' | '/gastrum' | '/api/chat'
+  to: '/' | '/gastrum' | '/internal' | '/api/chat'
+  id: '__root__' | '/' | '/gastrum' | '/internal' | '/api/chat'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   GastrumRoute: typeof GastrumRoute
+  InternalRoute: typeof InternalRoute
   ApiChatRoute: typeof ApiChatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/internal': {
+      id: '/internal'
+      path: '/internal'
+      fullPath: '/internal'
+      preLoaderRoute: typeof InternalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/gastrum': {
       id: '/gastrum'
       path: '/gastrum'
@@ -88,6 +105,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   GastrumRoute: GastrumRoute,
+  InternalRoute: InternalRoute,
   ApiChatRoute: ApiChatRoute,
 }
 export const routeTree = rootRouteImport

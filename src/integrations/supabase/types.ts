@@ -40,6 +40,7 @@ export type Database = {
       }
       guest_transactions: {
         Row: {
+          assigned_to: string | null
           created_at: string
           details: string
           id: string
@@ -47,8 +48,10 @@ export type Database = {
           room_number: string
           status: string
           transaction_type: string
+          updated_at: string
         }
         Insert: {
+          assigned_to?: string | null
           created_at?: string
           details: string
           id?: string
@@ -56,8 +59,10 @@ export type Database = {
           room_number: string
           status?: string
           transaction_type: string
+          updated_at?: string
         }
         Update: {
+          assigned_to?: string | null
           created_at?: string
           details?: string
           id?: string
@@ -65,6 +70,7 @@ export type Database = {
           room_number?: string
           status?: string
           transaction_type?: string
+          updated_at?: string
         }
         Relationships: []
       }
