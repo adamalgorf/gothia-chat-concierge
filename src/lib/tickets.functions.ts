@@ -17,7 +17,9 @@ export type Ticket = {
   updated_at: string;
 };
 
-export const listTickets = createServerFn({ method: "GET" }).handler(async () => {
+type TicketRow = Omit<Ticket, "items"> & { items: unknown };
+
+export const listTickets = createServerFn({ method: "GET" }).handler(async (): Promise<TicketRow[]> => {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data, error } = await supabaseAdmin
     .from("guest_transactions")
@@ -25,7 +27,17 @@ export const listTickets = createServerFn({ method: "GET" }).handler(async () =>
     .order("created_at", { ascending: false })
     .limit(200);
   if (error) throw new Error(error.message);
-  return (data ?? []) as Ticket[];
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    room_number: r.room_number,
+    transaction_type: r.transaction_type,
+    details: r.details,
+    items: JSON.parse(JSON.stringify(r.items ?? null)),
+    status: r.status,
+    assigned_to: r.assigned_to,
+    created_at: r.created_at,
+    updated_at: r.updated_at,
+  }));
 });
 
 const UpdateSchema = z.object({
@@ -38,7 +50,7 @@ export const updateTicket = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => UpdateSchema.parse(data))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const patch: Record<string, unknown> = {};
+    const patch: { status?: string; assigned_to?: string | null } = {};
     if (data.status !== undefined) patch.status = data.status;
     if (data.assigned_to !== undefined) patch.assigned_to = data.assigned_to;
     const { error } = await supabaseAdmin
@@ -48,3 +60,4 @@ export const updateTicket = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
