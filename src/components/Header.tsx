@@ -4,15 +4,21 @@ import logo from "@/assets/gothia-logo.png";
 interface HeaderProps {
   roomNumber: string;
   onCheckOut: () => void;
+  onNavigateHome?: () => void;
 }
 
-export function Header({ roomNumber, onCheckOut }: HeaderProps) {
+export function Header({ roomNumber, onCheckOut, onNavigateHome }: HeaderProps) {
   const isGuest = roomNumber === "guest";
 
   return (
     <header className="sticky top-0 z-20 border-b border-border/60 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3 sm:px-6">
-        <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={onNavigateHome}
+          className="flex items-center gap-3 rounded-xl transition-colors hover:bg-surface/60"
+          title="Till startsidan"
+        >
           <img
             src={logo}
             alt="Gothia Towers"
@@ -20,13 +26,13 @@ export function Header({ roomNumber, onCheckOut }: HeaderProps) {
             width={512}
             height={512}
           />
-          <div className="leading-tight">
+          <div className="leading-tight text-left">
             <p className="text-[10px] font-medium uppercase tracking-[0.3em] text-gold/80">
               Gothia Towers
             </p>
             <p className="font-display text-sm text-foreground">Guest AI Receptionist</p>
           </div>
-        </div>
+        </button>
 
         <div className="flex items-center gap-3">
           {/* Room / status badge */}
