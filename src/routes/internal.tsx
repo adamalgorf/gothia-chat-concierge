@@ -71,7 +71,7 @@ const PRIORITY_META: Record<
   { label: string; rank: number; icon: typeof AlertTriangle; chip: string; stripe: string; sort: number }
 > = {
   high: {
-    label: "Hög prio",
+    label: "Hög prioritet",
     rank: 0,
     icon: AlertTriangle,
     chip: "border-rose-400/40 bg-rose-400/10 text-rose-200",
@@ -79,7 +79,7 @@ const PRIORITY_META: Record<
     sort: 0,
   },
   normal: {
-    label: "Normal",
+    label: "Normal prioritet",
     rank: 1,
     icon: ArrowUp,
     chip: "border-amber-400/30 bg-amber-400/10 text-amber-200",
@@ -87,7 +87,7 @@ const PRIORITY_META: Record<
     sort: 1,
   },
   low: {
-    label: "Låg",
+    label: "Låg prioritet",
     rank: 2,
     icon: Minus,
     chip: "border-foreground/20 bg-foreground/5 text-foreground/60",
@@ -313,7 +313,7 @@ function InternalPortal() {
                           {meta.label}
                         </span>
                         <span
-                          className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] ${prio.chip} ${
+                          className={`inline-flex whitespace-nowrap items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.05em] ${prio.chip} ${
                             priority === "high" && !isDone ? "animate-pulse" : ""
                           }`}
                           title={prio.label}
