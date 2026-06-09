@@ -153,7 +153,7 @@ export function GuestChat({ roomNumber, initialMessages }: GuestChatProps) {
                     <div className="mb-1.5 text-[10px] font-medium uppercase tracking-[0.25em] text-gold/70">
                       Receptionist
                     </div>
-                    <div className="prose prose-sm prose-invert max-w-none prose-p:my-1.5 prose-strong:text-gold prose-headings:text-foreground prose-li:my-0.5">
+                    <div className="markdown-body">
                       <ReactMarkdown>{text}</ReactMarkdown>
                     </div>
                   </div>
