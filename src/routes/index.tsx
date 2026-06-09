@@ -32,10 +32,11 @@ const STORAGE_KEY = "gothia.room";
 function Index() {
   const [room, setRoom] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
+  const [storedRoom, setStoredRoom] = useState<string | null>(null);
   const [checkInNotice, setCheckInNotice] = useState<string | null>(null);
   const [autoPrompt, setAutoPrompt] = useState<string | undefined>(undefined);
 
-  // Resolve room: URL param > localStorage
+  // Resolve room from URL param, but keep stored room for landing page
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const fromUrl = params.get("room");
@@ -44,7 +45,9 @@ function Index() {
       localStorage.setItem(STORAGE_KEY, fromUrl);
     } else {
       const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored && /^[0-9]{2,6}$/.test(stored)) setRoom(stored);
+      if (stored && /^[0-9]{2,6}$/.test(stored)) {
+        setStoredRoom(stored);
+      }
     }
     setReady(true);
   }, []);
@@ -60,6 +63,7 @@ function Index() {
   const handleCheckIn = (r: string) => {
     localStorage.setItem(STORAGE_KEY, r);
     setAutoPrompt(undefined);
+    setStoredRoom(r);
     setRoom(r);
   };
 
@@ -68,9 +72,14 @@ function Index() {
     setRoom("guest");
   };
 
+  const handleContinue = () => {
+    if (storedRoom) setRoom(storedRoom);
+  };
+
   const handleCheckOut = () => {
     localStorage.removeItem(STORAGE_KEY);
     setRoom(null);
+    setStoredRoom(null);
     setCheckInNotice(null);
     const url = new URL(window.location.href);
     url.searchParams.delete("room");
@@ -78,11 +87,10 @@ function Index() {
   };
 
   const handleBookingConfirmed = (bookingNumber: string) => {
-    // Simulate a digital check-in: assign a fictitious room so the guest
-    // can continue testing in-house Samfex features in the same flow.
     if (room !== "guest") return;
     const assigned = "814";
     setRoom(assigned);
+    setStoredRoom(assigned);
     setCheckInNotice(`Digital incheckning slutförd · Rum ${assigned} · ${bookingNumber}`);
     setTimeout(() => setCheckInNotice(null), 8000);
   };
@@ -92,7 +100,15 @@ function Index() {
   }
 
   if (!room) {
-    return <CheckIn onCheckIn={handleCheckIn} onGuestMode={handleGuestMode} />;
+    return (
+      <CheckIn
+        storedRoom={storedRoom}
+        onCheckIn={handleCheckIn}
+        onGuestMode={handleGuestMode}
+        onContinue={handleContinue}
+        onCheckOut={handleCheckOut}
+      />
+    );
   }
 
   const initialMessages: UIMessage[] = isGuest
@@ -128,3 +144,4 @@ function Index() {
     </div>
   );
 }
+
