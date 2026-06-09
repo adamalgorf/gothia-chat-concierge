@@ -27,6 +27,9 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
       return;
     }
     setError(null);
+    toast.success(`Incheckad i rum ${trimmed}`, {
+      description: "Välkommen till Gothia Towers. Din digitala concierge är redo.",
+    });
     onCheckIn(trimmed);
   };
 
@@ -42,9 +45,19 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
   };
 
   const handleConfirmCheckOut = () => {
+    toast.success(`Utcheckad från rum ${checkOutRoom}`, {
+      description: "Tack för din vistelse. Vi ser fram emot att välkomna dig igen.",
+    });
     onCheckOut();
     setMode("choose");
     setCheckOutRoom("");
+  };
+
+  const handleBookRoom = () => {
+    toast.success("Bokningsförfrågan startad", {
+      description: "Berätta för concierge vilka datum och rumstyp du önskar.",
+    });
+    onGuestMode();
   };
 
   const resetToChoose = () => {
