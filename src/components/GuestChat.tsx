@@ -8,6 +8,7 @@ interface GuestChatProps {
   roomNumber: string;
   initialMessages: UIMessage[];
   onBookingConfirmed?: (bookingNumber: string) => void;
+  autoPrompt?: string;
 }
 
 // Minimal typing for browser SpeechRecognition
