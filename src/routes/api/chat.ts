@@ -219,8 +219,38 @@ export const Route = createFileRoute("/api/chat")({
                   });
                 },
               }),
+              order_room_service: tool({
+                description:
+                  "Lägg en room service-beställning (mat eller dryck levereras till rummet). Använd menyn i systeminstruktionerna och bekräfta varje rad med gästen innan anrop.",
+                inputSchema: z.object({
+                  room_number: z.string(),
+                  items: z
+                    .array(
+                      z.object({
+                        name: z.string().describe("Rättens/dryckens namn enligt menyn"),
+                        qty: z.number().int().positive(),
+                        price_sek: z.number().int().nonnegative().describe("Pris per styck i SEK enligt menyn"),
+                      }),
+                    )
+                    .min(1),
+                  notes: z.string().optional().describe("Allergier, specialönskemål, önskad leveranstid"),
+                }),
+                execute: async ({ items, notes }) => {
+                  const list = items as Array<{ name: string; qty: number; price_sek: number }>;
+                  const total = list.reduce((s, it) => s + it.qty * it.price_sek, 0);
+                  const summary = list.map((it) => `${it.qty}× ${it.name}`).join(", ");
+                  const details = `Room service: ${summary} · ${total} kr${notes ? ` · ${notes}` : ""}`;
+                  return saveTransaction({
+                    transaction_type: "HOTEL_SERVICE",
+                    details,
+                    items: [...list, { total_sek: total, notes: notes ?? null }],
+                    status: "kitchen_received",
+                  });
+                },
+              }),
               book_hotel_service: bookHotelService,
             };
+
 
         const system = BASE_PROMPT + (isGuest ? GUEST_PROMPT : ROOM_PROMPT(roomNumber));
 
