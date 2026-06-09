@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowUpRight, CheckCircle2, KeyRound, LogOut, Sparkles } from "lucide-react";
+import { ArrowUpRight, CheckCircle2, CreditCard, KeyRound, LogOut, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import heroImage from "@/assets/hero-towers.jpg";
 
@@ -11,7 +11,7 @@ interface CheckInProps {
   onCheckOut: () => void;
 }
 
-type Mode = "choose" | "checkin" | "checkin-success" | "checkout" | "checkout-confirm";
+type Mode = "choose" | "checkin" | "checkin-success" | "checkout" | "checkout-confirm" | "booking-payment";
 
 export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onCheckOut }: CheckInProps) {
   const [mode, setMode] = useState<Mode>("choose");
@@ -19,6 +19,10 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
   const [assignedRoom, setAssignedRoom] = useState("");
   const [checkOutRoom, setCheckOutRoom] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [cardName, setCardName] = useState("");
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardExpiry, setCardExpiry] = useState("");
+  const [cardCvc, setCardCvc] = useState("");
 
   const handleCheckInSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,9 +72,38 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
   };
 
   const handleBookRoom = () => {
-    toast.success("Bokningsförfrågan startad", {
-      description: "Berätta för concierge vilka datum och rumstyp du önskar.",
+    setError(null);
+    setMode("booking-payment");
+  };
+
+  const handleBookingPaymentSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const digits = cardNumber.replace(/\s/g, "");
+    if (cardName.trim().length < 2) {
+      setError("Ange kortinnehavarens namn.");
+      return;
+    }
+    if (!/^[0-9]{13,19}$/.test(digits)) {
+      setError("Ange ett giltigt kortnummer (13–19 siffror).");
+      return;
+    }
+    if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(cardExpiry)) {
+      setError("Utgångsdatum måste vara MM/ÅÅ.");
+      return;
+    }
+    if (!/^[0-9]{3,4}$/.test(cardCvc)) {
+      setError("CVC måste vara 3–4 siffror.");
+      return;
+    }
+    setError(null);
+    toast.success("Betalkort registrerat", {
+      description: `Kort ····${digits.slice(-4)} sparat. Concierge hjälper dig att slutföra bokningen.`,
     });
+    setMode("choose");
+    setCardName("");
+    setCardNumber("");
+    setCardExpiry("");
+    setCardCvc("");
     onGuestMode();
   };
 
@@ -350,6 +383,115 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
                 </button>
               </div>
             </div>
+          )}
+
+          {mode === "booking-payment" && (
+            <form onSubmit={handleBookingPaymentSubmit} className="mt-10 max-w-md space-y-5">
+              <div className="rounded-2xl border border-gold/30 bg-foreground/5 p-6 backdrop-blur-md">
+                <div className="flex items-center gap-3">
+                  <CreditCard className="h-6 w-6 text-gold" strokeWidth={2} />
+                  <h2 className="font-display text-lg font-medium tracking-wide text-foreground">
+                    Betalkort för bokning
+                  </h2>
+                </div>
+                <p className="mt-2 text-xs text-foreground/60">
+                  Vi reserverar kortet för att säkra din bokning. Inga pengar dras förrän rummet är bekräftat.
+                </p>
+
+                <div className="mt-5 space-y-3">
+                  <div>
+                    <label htmlFor="card-name" className="block text-[10px] font-medium uppercase tracking-[0.3em] text-foreground/60">
+                      Kortinnehavare
+                    </label>
+                    <input
+                      id="card-name"
+                      type="text"
+                      autoComplete="cc-name"
+                      value={cardName}
+                      onChange={(e) => setCardName(e.target.value)}
+                      placeholder="Anna Andersson"
+                      className="mt-1 w-full rounded-xl border border-foreground/25 bg-background/40 px-4 py-3 text-base text-foreground placeholder:text-foreground/30 focus:border-gold focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="card-number" className="block text-[10px] font-medium uppercase tracking-[0.3em] text-foreground/60">
+                      Kortnummer
+                    </label>
+                    <input
+                      id="card-number"
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="cc-number"
+                      maxLength={23}
+                      value={cardNumber}
+                      onChange={(e) => {
+                        const v = e.target.value.replace(/\D/g, "").slice(0, 19);
+                        setCardNumber(v.replace(/(.{4})/g, "$1 ").trim());
+                      }}
+                      placeholder="4242 4242 4242 4242"
+                      className="mt-1 w-full rounded-xl border border-foreground/25 bg-background/40 px-4 py-3 font-display tracking-[0.15em] text-foreground placeholder:text-foreground/30 focus:border-gold focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label htmlFor="card-expiry" className="block text-[10px] font-medium uppercase tracking-[0.3em] text-foreground/60">
+                        Utgång (MM/ÅÅ)
+                      </label>
+                      <input
+                        id="card-expiry"
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete="cc-exp"
+                        maxLength={5}
+                        value={cardExpiry}
+                        onChange={(e) => {
+                          const v = e.target.value.replace(/\D/g, "").slice(0, 4);
+                          setCardExpiry(v.length > 2 ? `${v.slice(0, 2)}/${v.slice(2)}` : v);
+                        }}
+                        placeholder="07/27"
+                        className="mt-1 w-full rounded-xl border border-foreground/25 bg-background/40 px-4 py-3 text-foreground placeholder:text-foreground/30 focus:border-gold focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="card-cvc" className="block text-[10px] font-medium uppercase tracking-[0.3em] text-foreground/60">
+                        CVC
+                      </label>
+                      <input
+                        id="card-cvc"
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete="cc-csc"
+                        maxLength={4}
+                        value={cardCvc}
+                        onChange={(e) => setCardCvc(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                        placeholder="123"
+                        className="mt-1 w-full rounded-xl border border-foreground/25 bg-background/40 px-4 py-3 text-foreground placeholder:text-foreground/30 focus:border-gold focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {error && <p className="text-xs text-destructive">{error}</p>}
+
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <button
+                  type="submit"
+                  className="flex-1 rounded-full bg-gold px-7 py-4 text-sm font-semibold uppercase tracking-wider text-gold-foreground transition-all hover:bg-gold-bright active:scale-[0.98]"
+                >
+                  Fortsätt till concierge
+                </button>
+                <button
+                  type="button"
+                  onClick={resetToChoose}
+                  className="flex-1 rounded-full border border-foreground/25 bg-foreground/5 px-7 py-4 text-sm font-semibold uppercase tracking-wider text-foreground backdrop-blur-md transition-all hover:border-gold/60 hover:bg-foreground/10 active:scale-[0.98]"
+                >
+                  Avbryt
+                </button>
+              </div>
+            </form>
           )}
         </div>
       </main>
