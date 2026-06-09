@@ -259,6 +259,26 @@ function InternalPortal() {
 
                       <p className="mt-2 text-sm leading-relaxed text-foreground/85 sm:text-[15px]">{t.details}</p>
 
+                      {guestsByRoom.get(t.room_number) && (
+                        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-foreground/55">
+                          <span className="font-medium text-foreground/80">
+                            {guestsByRoom.get(t.room_number)!.name}
+                          </span>
+                          <a
+                            href={`mailto:${guestsByRoom.get(t.room_number)!.email}`}
+                            className="hover:text-gold"
+                          >
+                            {guestsByRoom.get(t.room_number)!.email}
+                          </a>
+                          <a
+                            href={`tel:${guestsByRoom.get(t.room_number)!.phone}`}
+                            className="hover:text-gold"
+                          >
+                            {guestsByRoom.get(t.room_number)!.phone}
+                          </a>
+                        </div>
+                      )}
+
                       <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-foreground/50">
                         <span>{timeAgo(t.created_at)} sedan</span>
                         {t.assigned_to ? (
