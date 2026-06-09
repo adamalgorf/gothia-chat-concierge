@@ -77,7 +77,7 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
   const resetToChoose = () => {
     setMode("choose");
     setError(null);
-    setRoom("");
+    setBooking("");
     setCheckOutRoom("");
   };
 
