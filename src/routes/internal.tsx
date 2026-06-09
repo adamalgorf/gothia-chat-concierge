@@ -3,12 +3,15 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import {
+  AlertTriangle,
   ArrowLeft,
+  ArrowUp,
   BedDouble,
   Brush,
   Check,
   ClipboardList,
   Coffee,
+  Minus,
   RotateCcw,
   Sparkles,
   UserPlus2,
@@ -59,6 +62,58 @@ const STATUS_DOT: Record<string, string> = {
 
 function isOpen(t: Ticket) {
   return t.status !== "done";
+}
+
+type Priority = "high" | "normal" | "low";
+
+const PRIORITY_META: Record<
+  Priority,
+  { label: string; rank: number; icon: typeof AlertTriangle; chip: string; stripe: string; sort: number }
+> = {
+  high: {
+    label: "Hög prio",
+    rank: 0,
+    icon: AlertTriangle,
+    chip: "border-rose-400/40 bg-rose-400/10 text-rose-200",
+    stripe: "bg-rose-400",
+    sort: 0,
+  },
+  normal: {
+    label: "Normal",
+    rank: 1,
+    icon: ArrowUp,
+    chip: "border-amber-400/30 bg-amber-400/10 text-amber-200",
+    stripe: "bg-amber-400",
+    sort: 1,
+  },
+  low: {
+    label: "Låg",
+    rank: 2,
+    icon: Minus,
+    chip: "border-foreground/20 bg-foreground/5 text-foreground/60",
+    stripe: "bg-foreground/40",
+    sort: 2,
+  },
+};
+
+const URGENT_KEYWORDS = [
+  "akut", "läck", "leck", "trasig", "trasigt", "sönder", "sonder", "stopp",
+  "översvämn", "oversvamn", "lukt", "rök", "rok", "brand", "blod", "skadad",
+  "allergi", "läkare", "lakare", "ambulans", "fastnat", "kallt", "ingen värme",
+  "ingen el", "elavbrott",
+];
+
+const HIGH_PRIORITY_TYPES = new Set<string>([]);
+const LOW_PRIORITY_TYPES = new Set<string>(["DEBITERA_MINIBAR"]);
+
+function getPriority(t: Ticket): Priority {
+  const text = `${t.details ?? ""}`.toLowerCase();
+  if (URGENT_KEYWORDS.some((k) => text.includes(k))) return "high";
+  if (HIGH_PRIORITY_TYPES.has(t.transaction_type)) return "high";
+  if (LOW_PRIORITY_TYPES.has(t.transaction_type)) return "low";
+  if (t.transaction_type === "HOTEL_SERVICE") return "normal";
+  if (t.transaction_type === "WORK_REQUEST") return "low";
+  return "normal";
 }
 
 function timeAgo(iso: string) {
@@ -115,6 +170,9 @@ function InternalPortal() {
       filter === "open" ? all.filter(isOpen) : filter === "done" ? all.filter((t) => t.status === "done") : all;
     return [...list].sort((a, b) => {
       if (isOpen(a) !== isOpen(b)) return isOpen(a) ? -1 : 1;
+      const pa = PRIORITY_META[getPriority(a)].sort;
+      const pb = PRIORITY_META[getPriority(b)].sort;
+      if (pa !== pb) return pa - pb;
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
   }, [all, filter]);
@@ -215,18 +273,23 @@ function InternalPortal() {
             const Icon = meta.icon;
             const isDone = t.status === "done";
             const pending = mutation.isPending && mutation.variables?.id === t.id;
+            const priority = getPriority(t);
+            const prio = PRIORITY_META[priority];
+            const PrioIcon = prio.icon;
             return (
               <article
                 key={t.id}
                 className={`group relative overflow-hidden rounded-2xl border transition-all ${
                   isDone
                     ? "border-foreground/10 bg-foreground/[0.02] opacity-70"
-                    : "border-foreground/10 bg-foreground/[0.04] hover:border-gold/30 hover:bg-foreground/[0.06]"
+                    : priority === "high"
+                      ? "border-rose-400/30 bg-rose-400/[0.04] hover:border-rose-400/50 hover:bg-rose-400/[0.07]"
+                      : "border-foreground/10 bg-foreground/[0.04] hover:border-gold/30 hover:bg-foreground/[0.06]"
                 }`}
               >
-                {/* Status stripe */}
+                {/* Priority stripe */}
                 <span
-                  className={`absolute left-0 top-0 h-full w-1 ${STATUS_DOT[t.status] ?? "bg-foreground/30"}`}
+                  className={`absolute left-0 top-0 h-full w-1 ${isDone ? "bg-foreground/20" : prio.stripe}`}
                   aria-hidden
                 />
 
@@ -250,12 +313,22 @@ function InternalPortal() {
                           {meta.label}
                         </span>
                         <span
+                          className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] ${prio.chip} ${
+                            priority === "high" && !isDone ? "animate-pulse" : ""
+                          }`}
+                          title={prio.label}
+                        >
+                          <PrioIcon className="h-3 w-3" strokeWidth={2.5} />
+                          {prio.label}
+                        </span>
+                        <span
                           className={`inline-flex items-center gap-1.5 rounded-full bg-foreground/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-foreground/70`}
                         >
                           <span className={`h-1.5 w-1.5 rounded-full ${STATUS_DOT[t.status] ?? "bg-foreground/40"}`} />
                           {STATUS_LABEL[t.status] ?? t.status}
                         </span>
                       </div>
+
 
                       <p className="mt-2 text-sm leading-relaxed text-foreground/85 sm:text-[15px]">{t.details}</p>
 
