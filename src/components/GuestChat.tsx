@@ -34,11 +34,12 @@ function getRecognition(): SpeechRecognitionLike | null {
 }
 
 const SUGGESTIONS = [
-  "Vad är frukosttiderna?",
+  "Beställ room service",
+  "Visa frukostmenyn",
+  "Extra handdukar tack",
   "Boka taxi kl 18:00",
-  "Spa-öppettider idag",
-  "Restaurangrekommendation",
 ];
+
 
 export function GuestChat({ roomNumber, initialMessages, onBookingConfirmed, autoPrompt }: GuestChatProps) {
   const roomRef = useRef(roomNumber);
