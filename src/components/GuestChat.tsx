@@ -139,25 +139,39 @@ export function GuestChat({ roomNumber, initialMessages }: GuestChatProps) {
               .map((p) => (p.type === "text" ? p.text : ""))
               .join("");
             const isUser = m.role === "user";
+            const confirmations = m.parts.filter((p) => {
+              if (!p.type.startsWith("tool-")) return false;
+              const out = (p as { output?: { ok?: boolean } }).output;
+              return out?.ok === true;
+            });
             return (
-              <div
-                key={m.id}
-                className={`flex ${isUser ? "justify-end" : "justify-start"}`}
-              >
-                {isUser ? (
-                  <div className="max-w-[85%] rounded-2xl rounded-br-md bg-gold/15 px-4 py-3 text-sm text-foreground ring-1 ring-gold/25">
-                    {text}
-                  </div>
-                ) : (
-                  <div className="max-w-[90%] text-sm leading-relaxed text-foreground/90">
-                    <div className="mb-1.5 text-[10px] font-medium uppercase tracking-[0.25em] text-gold/70">
-                      Receptionist
+              <div key={m.id} className="space-y-2">
+                <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+                  {isUser ? (
+                    <div className="max-w-[85%] rounded-2xl rounded-br-md bg-gold/15 px-4 py-3 text-sm text-foreground ring-1 ring-gold/25">
+                      {text}
                     </div>
-                    <div className="markdown-body">
-                      <ReactMarkdown>{text}</ReactMarkdown>
+                  ) : (
+                    text && (
+                      <div className="max-w-[90%] text-sm leading-relaxed text-foreground/90">
+                        <div className="mb-1.5 text-[10px] font-medium uppercase tracking-[0.25em] text-gold/70">
+                          Receptionist
+                        </div>
+                        <div className="markdown-body">
+                          <ReactMarkdown>{text}</ReactMarkdown>
+                        </div>
+                      </div>
+                    )
+                  )}
+                </div>
+                {confirmations.map((_, i) => (
+                  <div key={i} className="flex justify-start animate-fade-in">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-300">
+                      <Check className="h-3.5 w-3.5" strokeWidth={2.5} />
+                      Mottaget av hotellet
                     </div>
                   </div>
-                )}
+                ))}
               </div>
             );
           })}
