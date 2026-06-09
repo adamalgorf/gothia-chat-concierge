@@ -122,6 +122,7 @@ function Index() {
           roomNumber={room}
           initialMessages={initialMessages}
           onBookingConfirmed={handleBookingConfirmed}
+          autoPrompt={isGuest ? autoPrompt : undefined}
         />
       )}
     </div>
