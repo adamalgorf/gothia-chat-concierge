@@ -1,13 +1,16 @@
 import { useState } from "react";
-import { ArrowUpRight, KeyRound, Sparkles } from "lucide-react";
+import { ArrowUpRight, DoorOpen, KeyRound, LogOut, Sparkles } from "lucide-react";
 import heroImage from "@/assets/hero-towers.jpg";
 
 interface CheckInProps {
+  storedRoom: string | null;
   onCheckIn: (room: string) => void;
   onGuestMode: () => void;
+  onContinue: () => void;
+  onCheckOut: () => void;
 }
 
-export function CheckIn({ onCheckIn, onGuestMode }: CheckInProps) {
+export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onCheckOut }: CheckInProps) {
   const [mode, setMode] = useState<"choose" | "room">("choose");
   const [room, setRoom] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -61,7 +64,42 @@ export function CheckIn({ onCheckIn, onGuestMode }: CheckInProps) {
             Hotell, spa och möten mitt i Göteborg. Din vistelse börjar här.
           </p>
 
-          {mode === "choose" ? (
+          {storedRoom ? (
+            <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:gap-4">
+              <button
+                type="button"
+                onClick={onContinue}
+                className="group relative flex flex-1 items-center justify-between gap-4 overflow-hidden rounded-full bg-gold px-7 py-5 text-left transition-all hover:bg-gold-bright active:scale-[0.98] sm:max-w-xs"
+              >
+                <div className="flex items-center gap-3">
+                  <DoorOpen className="h-5 w-5 text-gold-foreground" strokeWidth={2} />
+                  <div className="flex flex-col">
+                    <span className="text-sm font-semibold uppercase tracking-wider text-gold-foreground">
+                      Fortsätt
+                    </span>
+                    <span className="text-[10px] font-medium tracking-wider text-gold-foreground/70">
+                      Rum {storedRoom}
+                    </span>
+                  </div>
+                </div>
+                <ArrowUpRight className="h-5 w-5 text-gold-foreground transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </button>
+
+              <button
+                type="button"
+                onClick={onCheckOut}
+                className="group relative flex flex-1 items-center justify-between gap-4 overflow-hidden rounded-full border border-foreground/25 bg-foreground/5 px-7 py-5 text-left backdrop-blur-md transition-all hover:border-gold/60 hover:bg-foreground/10 active:scale-[0.98] sm:max-w-xs"
+              >
+                <div className="flex items-center gap-3">
+                  <LogOut className="h-5 w-5 text-gold" strokeWidth={2} />
+                  <span className="text-sm font-semibold uppercase tracking-wider text-foreground">
+                    Checka ut
+                  </span>
+                </div>
+                <ArrowUpRight className="h-5 w-5 text-foreground/70 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-gold" />
+              </button>
+            </div>
+          ) : mode === "choose" ? (
             <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:gap-4">
               <button
                 type="button"
@@ -138,3 +176,4 @@ export function CheckIn({ onCheckIn, onGuestMode }: CheckInProps) {
     </div>
   );
 }
+
