@@ -11,26 +11,40 @@ interface CheckInProps {
   onCheckOut: () => void;
 }
 
-type Mode = "choose" | "checkin" | "checkout" | "checkout-confirm";
+type Mode = "choose" | "checkin" | "checkin-success" | "checkout" | "checkout-confirm";
 
 export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onCheckOut }: CheckInProps) {
   const [mode, setMode] = useState<Mode>("choose");
-  const [room, setRoom] = useState("");
+  const [booking, setBooking] = useState("");
+  const [assignedRoom, setAssignedRoom] = useState("");
   const [checkOutRoom, setCheckOutRoom] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const handleCheckInSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmed = room.trim();
-    if (!/^[0-9]{2,6}$/.test(trimmed)) {
-      setError("Ange ett giltigt rumsnummer (2–6 siffror).");
+    const trimmed = booking.trim();
+    if (trimmed.length < 3) {
+      setError("Ange ditt bokningsnummer eller efternamn (minst 3 tecken).");
       return;
     }
     setError(null);
-    toast.success(`Incheckad i rum ${trimmed}`, {
-      description: "Välkommen till Gothia Towers. Din digitala concierge är redo.",
+    // Assign a room (demo: deterministic from input, floors 10–18)
+    const hash = Array.from(trimmed.toLowerCase()).reduce((a, c) => a + c.charCodeAt(0), 0);
+    const floor = 10 + (hash % 9);
+    const number = String(((hash * 7) % 24) + 1).padStart(2, "0");
+    const room = `${floor}${number}`;
+    setAssignedRoom(room);
+    setMode("checkin-success");
+    toast.success(`Incheckad i rum ${room}`, {
+      description: "Välkommen till Gothia Towers. Din mobila nyckel är redo.",
     });
-    onCheckIn(trimmed);
+  };
+
+  const handleEnterRoom = () => {
+    onCheckIn(assignedRoom);
+    setMode("choose");
+    setBooking("");
+    setAssignedRoom("");
   };
 
   const handleCheckOutSubmit = (e: React.FormEvent) => {
