@@ -7,6 +7,7 @@ import ReactMarkdown from "react-markdown";
 interface GuestChatProps {
   roomNumber: string;
   initialMessages: UIMessage[];
+  onBookingConfirmed?: (bookingNumber: string) => void;
 }
 
 // Minimal typing for browser SpeechRecognition
@@ -38,18 +39,25 @@ const SUGGESTIONS = [
   "Restaurangrekommendation",
 ];
 
-export function GuestChat({ roomNumber, initialMessages }: GuestChatProps) {
+export function GuestChat({ roomNumber, initialMessages, onBookingConfirmed }: GuestChatProps) {
+  const roomRef = useRef(roomNumber);
+  useEffect(() => {
+    roomRef.current = roomNumber;
+  }, [roomNumber]);
+
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
         api: "/api/chat",
-        body: { roomNumber },
+        prepareSendMessagesRequest: ({ messages, id }) => ({
+          body: { messages, id, roomNumber: roomRef.current },
+        }),
       }),
-    [roomNumber],
+    [],
   );
 
   const { messages, sendMessage, status, error } = useChat({
-    id: `room-${roomNumber}`,
+    id: "gothia-session",
     messages: initialMessages,
     transport,
   });
@@ -60,6 +68,7 @@ export function GuestChat({ roomNumber, initialMessages }: GuestChatProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const voiceSupported = useMemo(() => getRecognition() !== null, []);
+  const seenBookingsRef = useRef<Set<string>>(new Set());
 
   const isLoading = status === "submitted" || status === "streaming";
 
@@ -70,6 +79,22 @@ export function GuestChat({ roomNumber, initialMessages }: GuestChatProps) {
   useEffect(() => {
     textareaRef.current?.focus();
   }, [roomNumber, status]);
+
+  // Detect booking confirmations from tool outputs and notify parent.
+  useEffect(() => {
+    if (!onBookingConfirmed) return;
+    for (const m of messages) {
+      for (const p of m.parts) {
+        if (!p.type.startsWith("tool-")) continue;
+        const out = (p as { output?: { booking_number?: string } }).output;
+        const bn = out?.booking_number;
+        if (bn && !seenBookingsRef.current.has(bn)) {
+          seenBookingsRef.current.add(bn);
+          onBookingConfirmed(bn);
+        }
+      }
+    }
+  }, [messages, onBookingConfirmed]);
 
   const send = (text: string) => {
     const trimmed = text.trim();
