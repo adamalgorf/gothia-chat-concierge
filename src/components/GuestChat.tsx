@@ -64,6 +64,7 @@ export function GuestChat({ roomNumber, initialMessages, onBookingConfirmed }: G
 
   const [input, setInput] = useState("");
   const [listening, setListening] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -71,6 +72,16 @@ export function GuestChat({ roomNumber, initialMessages, onBookingConfirmed }: G
   const seenBookingsRef = useRef<Set<string>>(new Set());
 
   const isLoading = status === "submitted" || status === "streaming";
+
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setShowScrollTop(el.scrollTop > 300);
+  };
+
+  const scrollToTop = () => {
+    scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
