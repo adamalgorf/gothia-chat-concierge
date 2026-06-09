@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowUpRight, CheckCircle2, CreditCard, KeyRound, LogOut, Smartphone, Sparkles } from "lucide-react";
+import { ArrowUpRight, CheckCircle2, CreditCard, DoorOpen, KeyRound, LogOut, Smartphone, Sparkles } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
 import heroImage from "@/assets/hero-towers.jpg";
