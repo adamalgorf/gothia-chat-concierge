@@ -46,13 +46,13 @@ export function CheckIn({ onCheckIn, onGuestMode }: CheckInProps) {
         </div>
 
         {mode === "choose" ? (
-          <div className="mt-10 space-y-3">
+          <div className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-2">
             <button
               type="button"
               onClick={() => setMode("room")}
-              className="group flex w-full items-center gap-4 rounded-2xl border border-border bg-surface p-5 text-left transition-all hover:border-gold/50 hover:bg-surface-elevated"
+              className="group flex items-center gap-3 rounded-2xl border border-border bg-surface p-4 text-left transition-all hover:border-gold/50 hover:bg-surface-elevated sm:flex-col sm:items-start sm:gap-3 sm:p-5"
             >
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-gold/30 bg-gold/10 text-gold">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gold/30 bg-gold/10 text-gold sm:h-11 sm:w-11">
                 <KeyRound className="h-5 w-5" strokeWidth={1.75} />
               </div>
               <div className="flex-1">
@@ -63,26 +63,26 @@ export function CheckIn({ onCheckIn, onGuestMode }: CheckInProps) {
                   Logga in med rumsnummer
                 </div>
               </div>
-              <ArrowRight className="h-4 w-4 text-muted-foreground/60 transition-transform group-hover:translate-x-0.5 group-hover:text-gold" />
+              <ArrowRight className="hidden h-4 w-4 shrink-0 text-muted-foreground/60 transition-transform group-hover:translate-x-0.5 group-hover:text-gold sm:block" />
             </button>
 
             <button
               type="button"
               onClick={onGuestMode}
-              className="group flex w-full items-center gap-4 rounded-2xl border border-border bg-surface p-5 text-left transition-all hover:border-gold/50 hover:bg-surface-elevated"
+              className="group flex items-center gap-3 rounded-2xl border border-border bg-surface p-4 text-left transition-all hover:border-gold/50 hover:bg-surface-elevated sm:flex-col sm:items-start sm:gap-3 sm:p-5"
             >
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-gold/30 bg-gold/10 text-gold">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gold/30 bg-gold/10 text-gold sm:h-11 sm:w-11">
                 <Sparkles className="h-5 w-5" strokeWidth={1.75} />
               </div>
               <div className="flex-1">
                 <div className="text-sm font-medium text-foreground">
-                  Jag vill boka rum eller utforska
+                  Jag vill boka rum
                 </div>
                 <div className="mt-0.5 text-xs text-muted-foreground">
-                  Chatta med AI-receptionisten
+                  Utforska & chatta med AI
                 </div>
               </div>
-              <ArrowRight className="h-4 w-4 text-muted-foreground/60 transition-transform group-hover:translate-x-0.5 group-hover:text-gold" />
+              <ArrowRight className="hidden h-4 w-4 shrink-0 text-muted-foreground/60 transition-transform group-hover:translate-x-0.5 group-hover:text-gold sm:block" />
             </button>
           </div>
         ) : (
