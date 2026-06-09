@@ -233,6 +233,18 @@ export function GuestChat({ roomNumber, initialMessages, onBookingConfirmed }: G
             </div>
           )}
         </div>
+
+        {/* Scroll to top */}
+        {showScrollTop && (
+          <button
+            onClick={scrollToTop}
+            className="absolute bottom-4 right-4 flex h-10 w-10 items-center justify-center rounded-full border border-gold/40 bg-surface/90 text-gold shadow-lg backdrop-blur-md transition-all hover:bg-surface-elevated hover:scale-105"
+            aria-label="Scrolla till toppen"
+            title="Scrolla till toppen"
+          >
+            <ChevronUp className="h-5 w-5" strokeWidth={2} />
+          </button>
+        )}
       </div>
 
       {/* Composer */}
