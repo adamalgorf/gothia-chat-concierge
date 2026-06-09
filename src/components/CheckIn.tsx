@@ -26,6 +26,10 @@ type Mode = "choose" | "checkin" | "checkin-success" | "checkout" | "checkout-co
 export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onCheckOut }: CheckInProps) {
   const [mode, setMode] = useState<Mode>("choose");
   const [booking, setBooking] = useState("");
+  const [guestName, setGuestName] = useState("");
+  const [guestEmail, setGuestEmail] = useState("");
+  const [guestPhone, setGuestPhone] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
   const [assignedRoom, setAssignedRoom] = useState("");
   const [checkOutRoom, setCheckOutRoom] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -34,30 +38,70 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
   const [cardExpiry, setCardExpiry] = useState("");
   const [cardCvc, setCardCvc] = useState("");
 
-  const handleCheckInSubmit = (e: React.FormEvent) => {
+  const saveProfileFn = useServerFn(saveGuestProfile);
+  const checkOutFn = useServerFn(checkOutGuest);
+
+  const handleCheckInSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmed = booking.trim();
-    if (trimmed.length < 3) {
+    const trimmedBooking = booking.trim();
+    const trimmedName = guestName.trim();
+    const trimmedEmail = guestEmail.trim();
+    const trimmedPhone = guestPhone.trim();
+
+    if (trimmedBooking.length < 3) {
       setError("Ange ditt bokningsnummer eller efternamn (minst 3 tecken).");
       return;
     }
+    if (trimmedName.length < 2) {
+      setError("Ange för- och efternamn.");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      setError("Ange en giltig e-postadress.");
+      return;
+    }
+    if (!/^[0-9+()\-\s]{6,32}$/.test(trimmedPhone)) {
+      setError("Ange ett giltigt telefonnummer.");
+      return;
+    }
     setError(null);
+
     // Assign a room (demo: deterministic from input, floors 10–18)
-    const hash = Array.from(trimmed.toLowerCase()).reduce((a, c) => a + c.charCodeAt(0), 0);
+    const hash = Array.from(trimmedBooking.toLowerCase()).reduce((a, c) => a + c.charCodeAt(0), 0);
     const floor = 10 + (hash % 9);
     const number = String(((hash * 7) % 24) + 1).padStart(2, "0");
     const room = `${floor}${number}`;
-    setAssignedRoom(room);
-    setMode("checkin-success");
-    toast.success(`Incheckad i rum ${room}`, {
-      description: "Välkommen till Gothia Towers. Din mobila nyckel är redo.",
-    });
+
+    setIsSaving(true);
+    try {
+      await saveProfileFn({
+        data: {
+          room_number: room,
+          full_name: trimmedName,
+          email: trimmedEmail,
+          phone: trimmedPhone,
+          booking_reference: trimmedBooking,
+        },
+      });
+      setAssignedRoom(room);
+      setMode("checkin-success");
+      toast.success(`Incheckad i rum ${room}`, {
+        description: "Välkommen till Gothia Towers. Din mobila nyckel är redo.",
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Kunde inte spara incheckningen.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleEnterRoom = () => {
     onCheckIn(assignedRoom);
     setMode("choose");
     setBooking("");
+    setGuestName("");
+    setGuestEmail("");
+    setGuestPhone("");
     setAssignedRoom("");
   };
 
@@ -72,7 +116,12 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
     setMode("checkout-confirm");
   };
 
-  const handleConfirmCheckOut = () => {
+  const handleConfirmCheckOut = async () => {
+    try {
+      await checkOutFn({ data: { room_number: checkOutRoom } });
+    } catch {
+      // Non-blocking: still complete the UI flow even if record cleanup fails.
+    }
     toast.success(`Utcheckad från rum ${checkOutRoom}`, {
       description: "Tack för din vistelse. Vi ser fram emot att välkomna dig igen.",
     });
@@ -85,6 +134,7 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
     setError(null);
     setMode("booking-payment");
   };
+
 
   const handleBookingPaymentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
