@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowUpRight, CheckCircle2, CreditCard, DoorOpen, KeyRound, LogOut, Smartphone, Sparkles } from "lucide-react";
+import { ArrowUpRight, CheckCircle2, CreditCard, KeyRound, LogOut, Smartphone, Sparkles } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
 import heroImage from "@/assets/hero-towers.jpg";
@@ -19,7 +19,7 @@ interface CheckInProps {
   onCheckOut: () => void;
 }
 
-type Mode = "choose" | "checkin" | "checkin-success" | "checkout" | "checkout-confirm" | "booking-payment" | "guestroom";
+type Mode = "choose" | "checkin" | "checkin-success" | "checkout" | "checkout-confirm" | "booking-payment";
 
 export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onCheckOut }: CheckInProps) {
   const [mode, setMode] = useState<Mode>("choose");
@@ -31,23 +31,6 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
   const [cardNumber, setCardNumber] = useState("");
   const [cardExpiry, setCardExpiry] = useState("");
   const [cardCvc, setCardCvc] = useState("");
-  const [guestRoomInput, setGuestRoomInput] = useState("");
-
-  const handleGuestRoomSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmed = guestRoomInput.trim();
-    if (!/^[0-9]{2,6}$/.test(trimmed)) {
-      setError("Ange ett giltigt rumsnummer (2–6 siffror).");
-      return;
-    }
-    setError(null);
-    toast.success(`Ansluten till rum ${trimmed}`, {
-      description: "Du chattar nu med concierge direkt från rummet.",
-    });
-    setGuestRoomInput("");
-    setMode("choose");
-    onCheckIn(trimmed);
-  };
 
   const handleCheckInSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -137,7 +120,6 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
     setError(null);
     setBooking("");
     setCheckOutRoom("");
-    setGuestRoomInput("");
   };
 
   return (
