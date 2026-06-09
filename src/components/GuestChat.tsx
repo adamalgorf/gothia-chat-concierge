@@ -1,7 +1,7 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Check, Mic, MicOff, Send, Sparkles } from "lucide-react";
+import { Check, ChevronUp, Mic, MicOff, Send, Sparkles } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 interface GuestChatProps {
@@ -64,6 +64,7 @@ export function GuestChat({ roomNumber, initialMessages, onBookingConfirmed }: G
 
   const [input, setInput] = useState("");
   const [listening, setListening] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -71,6 +72,16 @@ export function GuestChat({ roomNumber, initialMessages, onBookingConfirmed }: G
   const seenBookingsRef = useRef<Set<string>>(new Set());
 
   const isLoading = status === "submitted" || status === "streaming";
+
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setShowScrollTop(el.scrollTop > 300);
+  };
+
+  const scrollToTop = () => {
+    scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -132,7 +143,7 @@ export function GuestChat({ roomNumber, initialMessages, onBookingConfirmed }: G
   return (
     <div className="flex h-[calc(100dvh-64px)] flex-col">
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6 sm:px-6">
+      <div ref={scrollRef} onScroll={handleScroll} className="relative flex-1 overflow-y-auto px-4 py-6 sm:px-6">
         <div className="mx-auto max-w-2xl space-y-6">
           {isEmpty && (
             <div className="flex flex-col items-center pt-8 text-center">
@@ -222,6 +233,18 @@ export function GuestChat({ roomNumber, initialMessages, onBookingConfirmed }: G
             </div>
           )}
         </div>
+
+        {/* Scroll to top */}
+        {showScrollTop && (
+          <button
+            onClick={scrollToTop}
+            className="absolute bottom-4 right-4 flex h-10 w-10 items-center justify-center rounded-full border border-gold/40 bg-surface/90 text-gold shadow-lg backdrop-blur-md transition-all hover:bg-surface-elevated hover:scale-105"
+            aria-label="Scrolla till toppen"
+            title="Scrolla till toppen"
+          >
+            <ChevronUp className="h-5 w-5" strokeWidth={2} />
+          </button>
+        )}
       </div>
 
       {/* Composer */}
