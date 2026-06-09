@@ -585,7 +585,55 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
               </div>
             </form>
           )}
+
+          {mode === "guestroom" && (
+            <form onSubmit={handleGuestRoomSubmit} className="mt-10 max-w-md space-y-4">
+              <div className="flex items-center gap-3">
+                <DoorOpen className="h-6 w-6 text-gold" strokeWidth={2} />
+                <h2 className="font-display text-lg font-medium tracking-wide text-foreground">
+                  Chatta från ditt rum
+                </h2>
+              </div>
+              <p className="text-xs text-foreground/60">
+                Ange rumsnumret som står på din nyckelkortshållare eller på TV:n. Du får direkt tillgång till
+                room service, städning och concierge — utan att checka in på nytt.
+              </p>
+              <label
+                htmlFor="guestroom-number"
+                className="block text-[10px] font-medium uppercase tracking-[0.35em] text-foreground/60"
+              >
+                Rumsnummer
+              </label>
+              <div className="flex gap-3">
+                <input
+                  id="guestroom-number"
+                  type="text"
+                  inputMode="numeric"
+                  autoFocus
+                  value={guestRoomInput}
+                  onChange={(e) => setGuestRoomInput(e.target.value.replace(/\D/g, ""))}
+                  placeholder="1204"
+                  className="flex-1 rounded-full border border-foreground/25 bg-foreground/5 px-6 py-4 font-display text-2xl tracking-[0.3em] text-foreground backdrop-blur-md placeholder:text-foreground/30 focus:border-gold focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  className="rounded-full bg-gold px-7 text-sm font-semibold uppercase tracking-wider text-gold-foreground transition-all hover:bg-gold-bright active:scale-[0.98]"
+                >
+                  Anslut
+                </button>
+              </div>
+              {error && <p className="text-xs text-destructive">{error}</p>}
+              <button
+                type="button"
+                onClick={resetToChoose}
+                className="text-[11px] uppercase tracking-[0.3em] text-foreground/60 hover:text-gold"
+              >
+                ← Tillbaka
+              </button>
+            </form>
+          )}
         </div>
+
       </main>
     </div>
   );
