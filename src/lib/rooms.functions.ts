@@ -43,7 +43,12 @@ export const updateRoom = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => UpdateRoomSchema.parse(d))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const patch: Record<string, unknown> = {};
+    const patch: {
+      status?: string;
+      assigned_cleaner?: string | null;
+      notes?: string | null;
+      last_cleaned_at?: string;
+    } = {};
     if (data.status !== undefined) {
       patch.status = data.status;
       if (data.status === "vacant_clean" || data.status === "inspected") {
