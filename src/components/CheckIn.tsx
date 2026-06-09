@@ -207,29 +207,31 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
           {mode === "checkin" && (
             <form onSubmit={handleCheckInSubmit} className="mt-10 max-w-md space-y-4">
               <label
-                htmlFor="room"
+                htmlFor="booking"
                 className="block text-[10px] font-medium uppercase tracking-[0.35em] text-foreground/60"
               >
-                Rumsnummer
+                Bokningsnummer eller efternamn
               </label>
               <div className="flex gap-3">
                 <input
-                  id="room"
+                  id="booking"
                   type="text"
-                  inputMode="numeric"
                   autoFocus
-                  value={room}
-                  onChange={(e) => setRoom(e.target.value.replace(/\D/g, ""))}
-                  placeholder="1204"
-                  className="flex-1 rounded-full border border-foreground/25 bg-foreground/5 px-6 py-4 font-display text-2xl tracking-[0.3em] text-foreground backdrop-blur-md placeholder:text-foreground/30 focus:border-gold focus:outline-none"
+                  value={booking}
+                  onChange={(e) => setBooking(e.target.value)}
+                  placeholder="GT-48201 / Andersson"
+                  className="flex-1 rounded-full border border-foreground/25 bg-foreground/5 px-6 py-4 font-display text-lg text-foreground backdrop-blur-md placeholder:text-foreground/30 focus:border-gold focus:outline-none"
                 />
                 <button
                   type="submit"
                   className="rounded-full bg-gold px-7 text-sm font-semibold uppercase tracking-wider text-gold-foreground transition-all hover:bg-gold-bright active:scale-[0.98]"
                 >
-                  Logga in
+                  Checka in
                 </button>
               </div>
+              <p className="text-xs text-foreground/50">
+                Vi tilldelar ditt rum direkt efter incheckning.
+              </p>
               {error && (
                 <p className="text-xs text-destructive">{error}</p>
               )}
@@ -242,6 +244,37 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
               </button>
             </form>
           )}
+
+          {mode === "checkin-success" && (
+            <div className="mt-10 max-w-md space-y-6">
+              <div className="rounded-2xl border border-gold/30 bg-foreground/5 p-6 backdrop-blur-md">
+                <div className="flex items-center gap-3">
+                  <CheckCircle2 className="h-6 w-6 text-gold" strokeWidth={2} />
+                  <h2 className="font-display text-lg font-medium tracking-wide text-foreground">
+                    Incheckning klar
+                  </h2>
+                </div>
+                <p className="mt-4 text-xs uppercase tracking-[0.3em] text-foreground/50">
+                  Ditt rum
+                </p>
+                <p className="font-display text-6xl font-light tracking-tight text-gold">
+                  {assignedRoom}
+                </p>
+                <p className="mt-3 text-sm text-foreground/70">
+                  Våning {assignedRoom.slice(0, 2)}. Din mobila nyckel är aktiverad och concierge är redo att hjälpa dig.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleEnterRoom}
+                className="w-full rounded-full bg-gold px-7 py-4 text-sm font-semibold uppercase tracking-wider text-gold-foreground transition-all hover:bg-gold-bright active:scale-[0.98]"
+              >
+                Fortsätt till concierge
+              </button>
+            </div>
+          )}
+
 
           {mode === "checkout" && (
             <form onSubmit={handleCheckOutSubmit} className="mt-10 max-w-md space-y-4">
