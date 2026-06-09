@@ -108,6 +108,16 @@ export function GuestChat({ roomNumber, initialMessages, onBookingConfirmed, aut
     }
   }, [messages, onBookingConfirmed]);
 
+  // Auto-send an initial prompt (e.g. trigger booking flow) on mount
+  const autoSentRef = useRef(false);
+  useEffect(() => {
+    if (autoSentRef.current) return;
+    if (!autoPrompt) return;
+    if (messages.length > 0) return;
+    autoSentRef.current = true;
+    sendMessage({ text: autoPrompt });
+  }, [autoPrompt, messages.length, sendMessage]);
+
   const send = (text: string) => {
     const trimmed = text.trim();
     if (!trimmed || isLoading) return;
