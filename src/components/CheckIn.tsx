@@ -3,6 +3,7 @@ import logo from "@/assets/gothia-logo.png";
 
 interface CheckInProps {
   onCheckIn: (room: string) => void;
+  onGuestMode: () => void;
 }
 
 export function CheckIn({ onCheckIn }: CheckInProps) {
