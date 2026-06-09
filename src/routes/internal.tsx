@@ -15,6 +15,7 @@ import {
   UtensilsCrossed,
 } from "lucide-react";
 import { listTickets, STAFF_MEMBERS, updateTicket, type Ticket } from "@/lib/tickets.functions";
+import { listActiveGuests } from "@/lib/guests.functions";
 
 export const Route = createFileRoute("/internal")({
   ssr: false,
