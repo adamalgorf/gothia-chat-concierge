@@ -313,7 +313,7 @@ function InternalPortal() {
                           {meta.label}
                         </span>
                         <span
-                          className={`inline-flex whitespace-nowrap items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.05em] ${prio.chip} ${
+                          className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-0.5 text-[11px] font-semibold tracking-normal ${prio.chip} ${
                             priority === "high" && !isDone ? "animate-pulse" : ""
                           }`}
                           title={prio.label}
@@ -322,7 +322,7 @@ function InternalPortal() {
                           {prio.label}
                         </span>
                         <span
-                          className={`inline-flex items-center gap-1.5 rounded-full bg-foreground/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-foreground/70`}
+                          className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full bg-foreground/5 px-2.5 py-0.5 text-[11px] font-semibold tracking-normal text-foreground/70"
                         >
                           <span className={`h-1.5 w-1.5 rounded-full ${STATUS_DOT[t.status] ?? "bg-foreground/40"}`} />
                           {STATUS_LABEL[t.status] ?? t.status}
