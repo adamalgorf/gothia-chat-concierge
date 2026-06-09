@@ -31,6 +31,23 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
   const [cardNumber, setCardNumber] = useState("");
   const [cardExpiry, setCardExpiry] = useState("");
   const [cardCvc, setCardCvc] = useState("");
+  const [guestRoomInput, setGuestRoomInput] = useState("");
+
+  const handleGuestRoomSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = guestRoomInput.trim();
+    if (!/^[0-9]{2,6}$/.test(trimmed)) {
+      setError("Ange ett giltigt rumsnummer (2–6 siffror).");
+      return;
+    }
+    setError(null);
+    toast.success(`Ansluten till rum ${trimmed}`, {
+      description: "Du chattar nu med concierge direkt från rummet.",
+    });
+    setGuestRoomInput("");
+    setMode("choose");
+    onCheckIn(trimmed);
+  };
 
   const handleCheckInSubmit = (e: React.FormEvent) => {
     e.preventDefault();
