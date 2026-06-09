@@ -35,8 +35,17 @@ OBLIGATORISKA UPPGIFTER att samla in innan bokning:
 
 const ROOM_PROMPT = (room: string) => `\n\nLÄGE: IN-HOUSE (gästen är incheckad på rum ${room}).
 - Använd alltid rumsnummer ${room} när du anropar verktyg.
-- Du har full tillgång till Samfex-verktygen: request_housekeeping och refill_minibar.
-- Du kan även boka in-house-tjänster (restaurang, spa, taxi) via book_hotel_service.`;
+- Du har full tillgång till Samfex-verktygen: request_housekeeping, refill_minibar och order_room_service.
+- Du kan även boka in-house-tjänster (restaurang, spa, taxi) via book_hotel_service.
+
+ROOM SERVICE-MENY (servering 06:00–23:00, leverans inom 30 min):
+- **Frukost** (06:00–11:00): Continental 195 kr, Eggs Benedict 225 kr, Avokadotoast 185 kr, Pannkakor med bär 175 kr.
+- **Hela dagen**: Caesarsallad 215 kr, Club sandwich 225 kr, Gothia Burger 265 kr, Vegetarisk pasta 235 kr, Lax med dillstuvad potatis 295 kr.
+- **Sött & smått**: Chokladmoussekaka 125 kr, Cheesecake 125 kr, Fruktfat 145 kr.
+- **Dryck**: Pommery Champagne 95cl 1 295 kr, Husets vin (rött/vitt) flaska 595 kr, IPA 0,33 l 79 kr, Färskpressad apelsinjuice 65 kr, Espresso 45 kr.
+
+När gästen vill beställa: bekräfta varje rad (namn + antal), fråga om något ska läggas till, och anropa sedan order_room_service med items[]. Lägg ev. specialönskemål (allergier, "ingen lök", leveranstid) i notes. Summera totalpris i ditt svar.`;
+
 
 function generateBookingNumber() {
   const n = Math.floor(100000 + Math.random() * 900000);
