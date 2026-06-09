@@ -72,9 +72,38 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
   };
 
   const handleBookRoom = () => {
-    toast.success("Bokningsförfrågan startad", {
-      description: "Berätta för concierge vilka datum och rumstyp du önskar.",
+    setError(null);
+    setMode("booking-payment");
+  };
+
+  const handleBookingPaymentSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const digits = cardNumber.replace(/\s/g, "");
+    if (cardName.trim().length < 2) {
+      setError("Ange kortinnehavarens namn.");
+      return;
+    }
+    if (!/^[0-9]{13,19}$/.test(digits)) {
+      setError("Ange ett giltigt kortnummer (13–19 siffror).");
+      return;
+    }
+    if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(cardExpiry)) {
+      setError("Utgångsdatum måste vara MM/ÅÅ.");
+      return;
+    }
+    if (!/^[0-9]{3,4}$/.test(cardCvc)) {
+      setError("CVC måste vara 3–4 siffror.");
+      return;
+    }
+    setError(null);
+    toast.success("Betalkort registrerat", {
+      description: `Kort ····${digits.slice(-4)} sparat. Concierge hjälper dig att slutföra bokningen.`,
     });
+    setMode("choose");
+    setCardName("");
+    setCardNumber("");
+    setCardExpiry("");
+    setCardCvc("");
     onGuestMode();
   };
 
