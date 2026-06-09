@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { convertToModelMessages, streamText, type UIMessage } from "ai";
+import { convertToModelMessages, stepCountIs, streamText, tool, type UIMessage } from "ai";
+import { z } from "zod";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 
 const SYSTEM_PROMPT = `Du är Gothia Towers virtuella AI-receptionist. Din roll är att ge service i världsklass, hantera bokningsförfrågningar och proaktivt hjälpa gästen.
