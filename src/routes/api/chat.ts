@@ -136,7 +136,7 @@ export const Route = createFileRoute("/api/chat")({
           },
         });
 
-        const tools = isGuest
+        const tools: Record<string, ReturnType<typeof tool>> = isGuest
           ? { book_hotel_service: bookHotelService }
           : {
               request_housekeeping: tool({
@@ -147,7 +147,7 @@ export const Route = createFileRoute("/api/chat")({
                   details: z.string().describe("Tydlig sammanfattning på svenska"),
                 }),
                 execute: async ({ details }) =>
-                  saveTransaction({ transaction_type: "WORK_REQUEST", details }),
+                  saveTransaction({ transaction_type: "WORK_REQUEST", details: details as string }),
               }),
               refill_minibar: tool({
                 description: "Rapportera minibar-konsumtion eller begär påfyllning.",
@@ -163,11 +163,12 @@ export const Route = createFileRoute("/api/chat")({
                     .min(1),
                 }),
                 execute: async ({ items }) => {
-                  const summary = items.map((it) => `${it.qty}× ${it.name}`).join(", ");
+                  const list = items as Array<{ name: string; qty: number }>;
+                  const summary = list.map((it) => `${it.qty}× ${it.name}`).join(", ");
                   return saveTransaction({
                     transaction_type: "DEBITERA_MINIBAR",
                     details: `Minibar: ${summary}`,
-                    items,
+                    items: list,
                   });
                 },
               }),
