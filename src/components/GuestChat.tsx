@@ -40,7 +40,7 @@ const SUGGESTIONS = [
   "Restaurangrekommendation",
 ];
 
-export function GuestChat({ roomNumber, initialMessages, onBookingConfirmed }: GuestChatProps) {
+export function GuestChat({ roomNumber, initialMessages, onBookingConfirmed, autoPrompt }: GuestChatProps) {
   const roomRef = useRef(roomNumber);
   useEffect(() => {
     roomRef.current = roomNumber;
