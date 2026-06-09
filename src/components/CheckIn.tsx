@@ -1,7 +1,15 @@
 import { useState } from "react";
-import { ArrowUpRight, CheckCircle2, CreditCard, KeyRound, LogOut, Sparkles } from "lucide-react";
+import { ArrowUpRight, CheckCircle2, CreditCard, KeyRound, LogOut, Smartphone, Sparkles } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
 import heroImage from "@/assets/hero-towers.jpg";
+
+const KEY_BASE_URL = "https://key.gothiatowers.app/unlock";
+
+function derivePin(room: string): string {
+  const hash = Array.from(room).reduce((a, c) => a * 31 + c.charCodeAt(0), 7);
+  return String(Math.abs(hash) % 10000).padStart(4, "0");
+}
 
 interface CheckInProps {
   storedRoom: string | null;
@@ -278,35 +286,82 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
             </form>
           )}
 
-          {mode === "checkin-success" && (
-            <div className="mt-10 max-w-md space-y-6">
-              <div className="rounded-2xl border border-gold/30 bg-foreground/5 p-6 backdrop-blur-md">
-                <div className="flex items-center gap-3">
-                  <CheckCircle2 className="h-6 w-6 text-gold" strokeWidth={2} />
-                  <h2 className="font-display text-lg font-medium tracking-wide text-foreground">
-                    Incheckning klar
-                  </h2>
+          {mode === "checkin-success" && (() => {
+            const pin = derivePin(assignedRoom);
+            const keyUrl = `${KEY_BASE_URL}?room=${assignedRoom}&pin=${pin}`;
+            return (
+              <div className="mt-10 max-w-md space-y-6">
+                <div className="rounded-2xl border border-gold/30 bg-foreground/5 p-6 backdrop-blur-md">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="h-6 w-6 text-gold" strokeWidth={2} />
+                    <h2 className="font-display text-lg font-medium tracking-wide text-foreground">
+                      Incheckning klar
+                    </h2>
+                  </div>
+                  <p className="mt-4 text-xs uppercase tracking-[0.3em] text-foreground/50">
+                    Ditt rum
+                  </p>
+                  <p className="font-display text-6xl font-light tracking-tight text-gold">
+                    {assignedRoom}
+                  </p>
+                  <p className="mt-3 text-sm text-foreground/70">
+                    Våning {assignedRoom.slice(0, 2)}. Din mobila nyckel är aktiverad nedan.
+                  </p>
                 </div>
-                <p className="mt-4 text-xs uppercase tracking-[0.3em] text-foreground/50">
-                  Ditt rum
-                </p>
-                <p className="font-display text-6xl font-light tracking-tight text-gold">
-                  {assignedRoom}
-                </p>
-                <p className="mt-3 text-sm text-foreground/70">
-                  Våning {assignedRoom.slice(0, 2)}. Din mobila nyckel är aktiverad och concierge är redo att hjälpa dig.
-                </p>
-              </div>
 
-              <button
-                type="button"
-                onClick={handleEnterRoom}
-                className="w-full rounded-full bg-gold px-7 py-4 text-sm font-semibold uppercase tracking-wider text-gold-foreground transition-all hover:bg-gold-bright active:scale-[0.98]"
-              >
-                Fortsätt till concierge
-              </button>
-            </div>
-          )}
+                <div className="rounded-2xl border border-gold/30 bg-foreground/5 p-6 backdrop-blur-md">
+                  <div className="flex items-center gap-3">
+                    <Smartphone className="h-6 w-6 text-gold" strokeWidth={2} />
+                    <h2 className="font-display text-lg font-medium tracking-wide text-foreground">
+                      Digital nyckel
+                    </h2>
+                  </div>
+                  <p className="mt-2 text-xs text-foreground/60">
+                    Håll QR-koden mot låsläsaren — eller knappa in PIN-koden på dörrpanelen.
+                  </p>
+
+                  <div className="mt-5 flex flex-col items-center gap-5 sm:flex-row sm:items-start">
+                    <div className="rounded-xl bg-white p-3 shadow-[0_8px_30px_-12px_rgba(202,168,99,0.5)]">
+                      <QRCodeSVG
+                        value={keyUrl}
+                        size={148}
+                        level="M"
+                        bgColor="#ffffff"
+                        fgColor="#0a0a0a"
+                      />
+                    </div>
+                    <div className="flex-1 space-y-3 text-center sm:text-left">
+                      <div>
+                        <p className="text-[10px] uppercase tracking-[0.3em] text-foreground/50">
+                          PIN-kod
+                        </p>
+                        <p className="font-display text-4xl font-light tracking-[0.4em] text-gold">
+                          {pin}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase tracking-[0.3em] text-foreground/50">
+                          Giltig till
+                        </p>
+                        <p className="text-sm text-foreground/80">
+                          Utcheckning kl 11:00
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleEnterRoom}
+                  className="w-full rounded-full bg-gold px-7 py-4 text-sm font-semibold uppercase tracking-wider text-gold-foreground transition-all hover:bg-gold-bright active:scale-[0.98]"
+                >
+                  Fortsätt till concierge
+                </button>
+              </div>
+            );
+          })()}
+
 
 
           {mode === "checkout" && (
