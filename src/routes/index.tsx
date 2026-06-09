@@ -32,6 +32,7 @@ const STORAGE_KEY = "gothia.room";
 function Index() {
   const [room, setRoom] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
+  const [checkInNotice, setCheckInNotice] = useState<string | null>(null);
 
   // Resolve room: URL param > localStorage
   useEffect(() => {
@@ -67,9 +68,20 @@ function Index() {
   const handleCheckOut = () => {
     localStorage.removeItem(STORAGE_KEY);
     setRoom(null);
+    setCheckInNotice(null);
     const url = new URL(window.location.href);
     url.searchParams.delete("room");
     window.history.replaceState({}, "", url.toString());
+  };
+
+  const handleBookingConfirmed = (bookingNumber: string) => {
+    // Simulate a digital check-in: assign a fictitious room so the guest
+    // can continue testing in-house Samfex features in the same flow.
+    if (room !== "guest") return;
+    const assigned = "814";
+    setRoom(assigned);
+    setCheckInNotice(`Digital incheckning slutförd · Rum ${assigned} · ${bookingNumber}`);
+    setTimeout(() => setCheckInNotice(null), 8000);
   };
 
   if (!ready) {
@@ -91,6 +103,11 @@ function Index() {
   return (
     <div className="min-h-dvh bg-background">
       <Header roomNumber={room} onCheckOut={handleCheckOut} />
+      {checkInNotice && (
+        <div className="border-b border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-center text-xs font-medium tracking-wide text-emerald-300 animate-fade-in">
+          ✓ {checkInNotice}
+        </div>
+      )}
       {!isGuest && historyQuery.isLoading ? (
         <div className="flex h-[calc(100dvh-64px)] items-center justify-center">
           <div className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
@@ -99,9 +116,9 @@ function Index() {
         </div>
       ) : (
         <GuestChat
-          key={room}
           roomNumber={room}
           initialMessages={initialMessages}
+          onBookingConfirmed={handleBookingConfirmed}
         />
       )}
     </div>
