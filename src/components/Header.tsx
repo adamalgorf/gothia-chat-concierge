@@ -35,10 +35,10 @@ export function Header({ roomNumber, onCheckOut }: HeaderProps) {
             <span className="relative inline-flex h-2 w-2 rounded-full bg-gold" />
           </span>
           <span className="text-[10px] font-medium uppercase tracking-[0.25em] text-muted-foreground">
-            Rum
+            {roomNumber === "guest" ? "Status" : "Rum"}
           </span>
           <span className="font-display text-sm font-medium tracking-wider text-gold">
-            {roomNumber}
+            {roomNumber === "guest" ? "Ej incheckad" : roomNumber}
           </span>
         </button>
       </div>

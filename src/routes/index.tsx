@@ -47,10 +47,12 @@ function Index() {
     setReady(true);
   }, []);
 
+  const isGuest = room === "guest";
+
   const historyQuery = useQuery({
     queryKey: ["chat-history", room],
     queryFn: () => getMessagesForRoom({ data: { roomNumber: room! } }),
-    enabled: !!room,
+    enabled: !!room && !isGuest,
   });
 
   const handleCheckIn = (r: string) => {
@@ -58,10 +60,13 @@ function Index() {
     setRoom(r);
   };
 
+  const handleGuestMode = () => {
+    setRoom("guest");
+  };
+
   const handleCheckOut = () => {
     localStorage.removeItem(STORAGE_KEY);
     setRoom(null);
-    // Strip ?room= from URL
     const url = new URL(window.location.href);
     url.searchParams.delete("room");
     window.history.replaceState({}, "", url.toString());
@@ -72,19 +77,21 @@ function Index() {
   }
 
   if (!room) {
-    return <CheckIn onCheckIn={handleCheckIn} />;
+    return <CheckIn onCheckIn={handleCheckIn} onGuestMode={handleGuestMode} />;
   }
 
-  const initialMessages: UIMessage[] = (historyQuery.data ?? []).map((m) => ({
-    id: m.id,
-    role: m.role as "user" | "assistant",
-    parts: [{ type: "text", text: m.content }],
-  }));
+  const initialMessages: UIMessage[] = isGuest
+    ? []
+    : (historyQuery.data ?? []).map((m) => ({
+        id: m.id,
+        role: m.role as "user" | "assistant",
+        parts: [{ type: "text", text: m.content }],
+      }));
 
   return (
     <div className="min-h-dvh bg-background">
       <Header roomNumber={room} onCheckOut={handleCheckOut} />
-      {historyQuery.isLoading ? (
+      {!isGuest && historyQuery.isLoading ? (
         <div className="flex h-[calc(100dvh-64px)] items-center justify-center">
           <div className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
             Laddar...
