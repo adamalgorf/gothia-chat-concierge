@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowUpRight, CheckCircle2, KeyRound, LogOut, Sparkles } from "lucide-react";
+import { ArrowUpRight, CheckCircle2, CreditCard, KeyRound, LogOut, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import heroImage from "@/assets/hero-towers.jpg";
 
