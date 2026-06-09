@@ -67,8 +67,8 @@ function Index() {
     setRoom(r);
   };
 
-  const handleGuestMode = () => {
-    setAutoPrompt("Hej! Jag vill boka ett rum.");
+  const handleGuestMode = (prompt?: string) => {
+    setAutoPrompt(prompt ?? "Hej! Jag vill boka ett rum.");
     setRoom("guest");
   };
 
@@ -144,4 +144,3 @@ function Index() {
     </div>
   );
 }
-

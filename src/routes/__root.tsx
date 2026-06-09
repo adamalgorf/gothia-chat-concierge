@@ -10,7 +10,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
+import { reportAppError } from "../lib/error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -39,7 +39,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
   useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
+    reportAppError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
 
   return (
@@ -96,8 +96,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "Gothia Concierge AI is a mobile-first web app for hotel guests to interact with hotel services." },
       { property: "og:description", content: "Gothia Concierge AI is a mobile-first web app for hotel guests to interact with hotel services." },
       { name: "twitter:description", content: "Gothia Concierge AI is a mobile-first web app for hotel guests to interact with hotel services." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/cc829f57-1877-4bc9-a4cc-181a3a0312a8/id-preview-81ab0687--833b2d03-05c6-47ac-99b9-bf8d7f6b2d5b.lovable.app-1781012783120.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/cc829f57-1877-4bc9-a4cc-181a3a0312a8/id-preview-81ab0687--833b2d03-05c6-47ac-99b9-bf8d7f6b2d5b.lovable.app-1781012783120.png" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },

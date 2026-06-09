@@ -46,7 +46,7 @@ const ToggleSchema = z.object({
 });
 
 export const toggleChecklistItem = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => ToggleSchema.parse(d))
+  .validator((d: unknown) => ToggleSchema.parse(d))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const today = new Date().toISOString().slice(0, 10);

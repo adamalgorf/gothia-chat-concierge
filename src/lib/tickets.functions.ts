@@ -48,7 +48,7 @@ const UpdateSchema = z.object({
 });
 
 export const updateTicket = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => UpdateSchema.parse(data))
+  .validator((data: unknown) => UpdateSchema.parse(data))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const patch: { status?: string; assigned_to?: string | null } = {};
@@ -61,4 +61,3 @@ export const updateTicket = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
-

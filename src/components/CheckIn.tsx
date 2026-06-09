@@ -4,24 +4,39 @@ import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { saveGuestProfile, checkOutGuest } from "@/lib/guests.functions";
+import {
+  BREAKFAST_PRICE_PER_GUEST_NIGHT_SEK,
+  DEFAULT_BOOKING_QUOTE_INPUT,
+  ROOM_TYPES,
+  buildBookingConciergePrompt,
+  calculateBookingQuote,
+  formatSek,
+  validateBookingQuoteInput,
+  type RoomTypeId,
+} from "@/lib/booking/booking-pricing";
+import {
+  assignDemoRoom,
+  deriveRoomPin,
+  formatCardExpiryInput,
+  formatCardNumberInput,
+  normalizeCardNumber,
+  validateCheckInForm,
+  validatePaymentCard,
+  validateRoomNumber,
+} from "@/lib/check-in/check-in-flow";
 import heroImage from "@/assets/hero-towers.jpg";
 
 const KEY_BASE_URL = "https://key.gothiatowers.app/unlock";
 
-function derivePin(room: string): string {
-  const hash = Array.from(room).reduce((a, c) => a * 31 + c.charCodeAt(0), 7);
-  return String(Math.abs(hash) % 10000).padStart(4, "0");
-}
-
 interface CheckInProps {
   storedRoom: string | null;
   onCheckIn: (room: string) => void;
-  onGuestMode: () => void;
+  onGuestMode: (prompt?: string) => void;
   onContinue: () => void;
   onCheckOut: () => void;
 }
 
-type Mode = "choose" | "checkin" | "checkin-success" | "checkout" | "checkout-confirm" | "booking-payment";
+type Mode = "choose" | "checkin" | "checkin-success" | "checkout" | "checkout-confirm" | "booking-details" | "booking-payment";
 
 export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onCheckOut }: CheckInProps) {
   const [mode, setMode] = useState<Mode>("choose");
@@ -37,9 +52,22 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
   const [cardNumber, setCardNumber] = useState("");
   const [cardExpiry, setCardExpiry] = useState("");
   const [cardCvc, setCardCvc] = useState("");
+  const [bookingQuoteInput, setBookingQuoteInput] = useState(DEFAULT_BOOKING_QUOTE_INPUT);
 
   const saveProfileFn = useServerFn(saveGuestProfile);
   const checkOutFn = useServerFn(checkOutGuest);
+  const bookingQuote = calculateBookingQuote(bookingQuoteInput);
+
+  const updateBookingQuoteInput = <Key extends keyof typeof bookingQuoteInput>(
+    key: Key,
+    value: (typeof bookingQuoteInput)[Key],
+  ) => {
+    setBookingQuoteInput((current) => ({ ...current, [key]: value }));
+  };
+
+  const resetBookingQuoteInput = () => {
+    setBookingQuoteInput(DEFAULT_BOOKING_QUOTE_INPUT);
+  };
 
   const handleCheckInSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,29 +76,20 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
     const trimmedEmail = guestEmail.trim();
     const trimmedPhone = guestPhone.trim();
 
-    if (trimmedBooking.length < 3) {
-      setError("Ange ditt bokningsnummer eller efternamn (minst 3 tecken).");
-      return;
-    }
-    if (trimmedName.length < 2) {
-      setError("Ange för- och efternamn.");
-      return;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
-      setError("Ange en giltig e-postadress.");
-      return;
-    }
-    if (!/^[0-9+()\-\s]{6,32}$/.test(trimmedPhone)) {
-      setError("Ange ett giltigt telefonnummer.");
+    const validationError = validateCheckInForm({
+      bookingReference: trimmedBooking,
+      guestName: trimmedName,
+      guestEmail: trimmedEmail,
+      guestPhone: trimmedPhone,
+    });
+
+    if (validationError) {
+      setError(validationError);
       return;
     }
     setError(null);
 
-    // Assign a room (demo: deterministic from input, floors 10–18)
-    const hash = Array.from(trimmedBooking.toLowerCase()).reduce((a, c) => a + c.charCodeAt(0), 0);
-    const floor = 10 + (hash % 9);
-    const number = String(((hash * 7) % 24) + 1).padStart(2, "0");
-    const room = `${floor}${number}`;
+    const room = assignDemoRoom(trimmedBooking);
 
     setIsSaving(true);
     try {
@@ -108,8 +127,9 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
   const handleCheckOutSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = checkOutRoom.trim();
-    if (!/^[0-9]{2,6}$/.test(trimmed)) {
-      setError("Ange ett giltigt rumsnummer (2–6 siffror).");
+    const validationError = validateRoomNumber(trimmed);
+    if (validationError) {
+      setError(validationError);
       return;
     }
     setError(null);
@@ -132,29 +152,29 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
 
   const handleBookRoom = () => {
     setError(null);
+    setMode("booking-details");
+  };
+
+  const handleBookingDetailsSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const validationError = validateBookingQuoteInput(bookingQuoteInput);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+    setError(null);
     setMode("booking-payment");
   };
 
 
   const handleBookingPaymentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const digits = cardNumber.replace(/\s/g, "");
-    if (cardName.trim().length < 2) {
-      setError("Ange kortinnehavarens namn.");
+    const validationError = validatePaymentCard({ cardName, cardNumber, cardExpiry, cardCvc });
+    if (validationError) {
+      setError(validationError);
       return;
     }
-    if (!/^[0-9]{13,19}$/.test(digits)) {
-      setError("Ange ett giltigt kortnummer (13–19 siffror).");
-      return;
-    }
-    if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(cardExpiry)) {
-      setError("Utgångsdatum måste vara MM/ÅÅ.");
-      return;
-    }
-    if (!/^[0-9]{3,4}$/.test(cardCvc)) {
-      setError("CVC måste vara 3–4 siffror.");
-      return;
-    }
+    const digits = normalizeCardNumber(cardNumber);
     setError(null);
     toast.success("Betalkort registrerat", {
       description: `Kort ····${digits.slice(-4)} sparat. Concierge hjälper dig att slutföra bokningen.`,
@@ -164,7 +184,8 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
     setCardNumber("");
     setCardExpiry("");
     setCardCvc("");
-    onGuestMode();
+    resetBookingQuoteInput();
+    onGuestMode(buildBookingConciergePrompt(bookingQuoteInput, bookingQuote));
   };
 
   const resetToChoose = () => {
@@ -175,6 +196,7 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
     setGuestEmail("");
     setGuestPhone("");
     setCheckOutRoom("");
+    resetBookingQuoteInput();
   };
 
   return (
@@ -394,7 +416,7 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
           )}
 
           {mode === "checkin-success" && (() => {
-            const pin = derivePin(assignedRoom);
+            const pin = deriveRoomPin(assignedRoom);
             const keyUrl = `${KEY_BASE_URL}?room=${assignedRoom}&pin=${pin}`;
             return (
               <div className="mt-10 max-w-md space-y-6">
@@ -547,6 +569,139 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
             </div>
           )}
 
+          {mode === "booking-details" && (
+            <form onSubmit={handleBookingDetailsSubmit} className="mt-10 max-w-xl space-y-5">
+              <div className="rounded-2xl border border-gold/30 bg-foreground/5 p-6 backdrop-blur-md">
+                <div className="flex items-center gap-3">
+                  <Sparkles className="h-6 w-6 text-gold" strokeWidth={2} />
+                  <h2 className="font-display text-lg font-medium tracking-wide text-foreground">
+                    Boka rum
+                  </h2>
+                </div>
+
+                <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label htmlFor="booking-check-in" className="block text-[10px] font-medium uppercase tracking-[0.3em] text-foreground/60">
+                      Ankomst
+                    </label>
+                    <input
+                      id="booking-check-in"
+                      type="date"
+                      value={bookingQuoteInput.checkIn}
+                      onChange={(e) => updateBookingQuoteInput("checkIn", e.target.value)}
+                      className="mt-1 w-full rounded-xl border border-foreground/25 bg-background/40 px-4 py-3 text-foreground focus:border-gold focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="booking-check-out" className="block text-[10px] font-medium uppercase tracking-[0.3em] text-foreground/60">
+                      Avresa
+                    </label>
+                    <input
+                      id="booking-check-out"
+                      type="date"
+                      value={bookingQuoteInput.checkOut}
+                      onChange={(e) => updateBookingQuoteInput("checkOut", e.target.value)}
+                      className="mt-1 w-full rounded-xl border border-foreground/25 bg-background/40 px-4 py-3 text-foreground focus:border-gold focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="booking-guests" className="block text-[10px] font-medium uppercase tracking-[0.3em] text-foreground/60">
+                      Gäster
+                    </label>
+                    <input
+                      id="booking-guests"
+                      type="number"
+                      min={1}
+                      max={8}
+                      value={bookingQuoteInput.guests}
+                      onChange={(e) => updateBookingQuoteInput("guests", Number(e.target.value))}
+                      className="mt-1 w-full rounded-xl border border-foreground/25 bg-background/40 px-4 py-3 text-foreground focus:border-gold focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="booking-rooms" className="block text-[10px] font-medium uppercase tracking-[0.3em] text-foreground/60">
+                      Antal rum
+                    </label>
+                    <input
+                      id="booking-rooms"
+                      type="number"
+                      min={1}
+                      max={4}
+                      value={bookingQuoteInput.rooms}
+                      onChange={(e) => updateBookingQuoteInput("rooms", Number(e.target.value))}
+                      className="mt-1 w-full rounded-xl border border-foreground/25 bg-background/40 px-4 py-3 text-foreground focus:border-gold focus:outline-none"
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label htmlFor="booking-room-type" className="block text-[10px] font-medium uppercase tracking-[0.3em] text-foreground/60">
+                      Rumstyp
+                    </label>
+                    <select
+                      id="booking-room-type"
+                      value={bookingQuoteInput.roomTypeId}
+                      onChange={(e) => updateBookingQuoteInput("roomTypeId", e.target.value as RoomTypeId)}
+                      className="mt-1 w-full rounded-xl border border-foreground/25 bg-background/40 px-4 py-3 text-foreground focus:border-gold focus:outline-none"
+                    >
+                      {ROOM_TYPES.map((type) => (
+                        <option key={type.id} value={type.id}>
+                          {type.label} - från {formatSek(type.pricePerNightSek)} / natt
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <label className="mt-5 flex items-center gap-3 text-sm text-foreground/75">
+                  <input
+                    type="checkbox"
+                    checked={bookingQuoteInput.includeBreakfast}
+                    onChange={(e) => updateBookingQuoteInput("includeBreakfast", e.target.checked)}
+                    className="h-4 w-4 accent-gold"
+                  />
+                  Lägg till frukost, {formatSek(BREAKFAST_PRICE_PER_GUEST_NIGHT_SEK)} per gäst och natt
+                </label>
+
+                <div className="mt-6 space-y-2 border-t border-foreground/15 pt-5 text-sm text-foreground/75">
+                  <div className="flex justify-between gap-4">
+                    <span>
+                      {bookingQuote.roomType.label} · {bookingQuoteInput.rooms} rum · {bookingQuote.nights || 0} nätter
+                    </span>
+                    <span className="text-foreground">{formatSek(bookingQuote.roomSubtotalSek)}</span>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <span>Frukost</span>
+                    <span className="text-foreground">{formatSek(bookingQuote.breakfastSubtotalSek)}</span>
+                  </div>
+                  <div className="flex justify-between gap-4 pt-3 font-display text-2xl text-gold">
+                    <span>Totalt</span>
+                    <span>{formatSek(bookingQuote.totalSek)}</span>
+                  </div>
+                  <p className="text-xs text-foreground/50">
+                    Kortuppgifter efterfrågas först i nästa steg, efter att du sett rum, antal och totalpris.
+                  </p>
+                </div>
+              </div>
+
+              {error && <p className="text-xs text-destructive">{error}</p>}
+
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <button
+                  type="submit"
+                  className="flex-1 rounded-full bg-gold px-7 py-4 text-sm font-semibold uppercase tracking-wider text-gold-foreground transition-all hover:bg-gold-bright active:scale-[0.98]"
+                >
+                  Fortsätt till kort
+                </button>
+                <button
+                  type="button"
+                  onClick={resetToChoose}
+                  className="flex-1 rounded-full border border-foreground/25 bg-foreground/5 px-7 py-4 text-sm font-semibold uppercase tracking-wider text-foreground backdrop-blur-md transition-all hover:border-gold/60 hover:bg-foreground/10 active:scale-[0.98]"
+                >
+                  Avbryt
+                </button>
+              </div>
+            </form>
+          )}
+
           {mode === "booking-payment" && (
             <form onSubmit={handleBookingPaymentSubmit} className="mt-10 max-w-md space-y-5">
               <div className="rounded-2xl border border-gold/30 bg-foreground/5 p-6 backdrop-blur-md">
@@ -559,6 +714,16 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
                 <p className="mt-2 text-xs text-foreground/60">
                   Vi reserverar kortet för att säkra din bokning. Inga pengar dras förrän rummet är bekräftat.
                 </p>
+
+                <div className="mt-5 rounded-xl border border-foreground/15 bg-background/35 p-4 text-sm text-foreground/75">
+                  <div className="flex justify-between gap-4">
+                    <span>{bookingQuoteInput.rooms} rum · {bookingQuoteInput.guests} gäster · {bookingQuote.nights} nätter</span>
+                    <span className="text-gold">{formatSek(bookingQuote.totalSek)}</span>
+                  </div>
+                  <p className="mt-1 text-xs text-foreground/50">
+                    {bookingQuote.roomType.label}, {bookingQuoteInput.checkIn} till {bookingQuoteInput.checkOut}
+                  </p>
+                </div>
 
                 <div className="mt-5 space-y-3">
                   <div>
@@ -587,10 +752,7 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
                       autoComplete="cc-number"
                       maxLength={23}
                       value={cardNumber}
-                      onChange={(e) => {
-                        const v = e.target.value.replace(/\D/g, "").slice(0, 19);
-                        setCardNumber(v.replace(/(.{4})/g, "$1 ").trim());
-                      }}
+                      onChange={(e) => setCardNumber(formatCardNumberInput(e.target.value))}
                       placeholder="4242 4242 4242 4242"
                       className="mt-1 w-full rounded-xl border border-foreground/25 bg-background/40 px-4 py-3 font-display tracking-[0.15em] text-foreground placeholder:text-foreground/30 focus:border-gold focus:outline-none"
                     />
@@ -608,10 +770,7 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
                         autoComplete="cc-exp"
                         maxLength={5}
                         value={cardExpiry}
-                        onChange={(e) => {
-                          const v = e.target.value.replace(/\D/g, "").slice(0, 4);
-                          setCardExpiry(v.length > 2 ? `${v.slice(0, 2)}/${v.slice(2)}` : v);
-                        }}
+                        onChange={(e) => setCardExpiry(formatCardExpiryInput(e.target.value))}
                         placeholder="07/27"
                         className="mt-1 w-full rounded-xl border border-foreground/25 bg-background/40 px-4 py-3 text-foreground placeholder:text-foreground/30 focus:border-gold focus:outline-none"
                       />
