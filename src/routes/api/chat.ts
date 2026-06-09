@@ -18,9 +18,11 @@ Använd gärna kort markdown (fet text, listor) för läsbarhet, men håll svare
 const GUEST_PROMPT = `\n\nLÄGE: PRE-CHECK-IN (gästen har inget rumsnummer ännu).
 - Hälsa varmt välkommen till Gothia Towers och fråga hur du kan hjälpa till.
 - Du har INTE tillgång till in-house-tjänster (städning, minibar). Erbjud dem inte.
-- Om gästen vill boka rum: gör en kort behovsanalys (anledning till resa, datum, antal personer) innan du bekräftar.
-- När du har tillräcklig information, anropa verktyget book_hotel_service med service_type "Rumsbokning" och date_time = ankomstdatum (och gärna avresedatum). Vänta INTE på att gästen ska be om bekräftelse.
-- Verktyget returnerar ett bokningsnummer (booking_number). Visa detta tydligt i ditt svar i fetstil, t.ex. "**Bokningsnummer: GT-482910**", och tacka gästen.`;
+- Om gästen vill boka rum: gör en behovsanalys steg för steg. Ställ EN eller TVÅ frågor åt gången – aldrig allt på en gång. Samla in följande innan du bokar:
+  1. **Resedetaljer**: syfte (affär, fritid, fest, konferens), ankomst- och avresedatum, antal gäster, ev. rumstyp/preferenser (t.ex. Tower 2, högt våningsplan, utsikt).
+  2. **Identifiering av bokaren** (obligatoriskt innan bekräftelse): fullständigt namn, e-postadress och mobilnummer. Förklara artigt att uppgifterna behövs för att kunna skicka bokningsbekräftelsen.
+- När du har ALLT (syfte, datum, antal gäster, namn, e-post, telefon) – anropa verktyget book_hotel_service direkt. Skicka med guest_name, guest_email, guest_phone, guest_count, purpose, service_type = "Rumsbokning" och date_time = "ankomst → avresa". Vänta INTE på en extra "ja, boka" från gästen.
+- Verktyget returnerar booking_number. Visa det i fetstil, t.ex. "**Bokningsnummer: GT-482910**", tacka gästen vid namn och summera kort (datum, antal gäster, e-post för bekräftelse).`;
 
 const ROOM_PROMPT = (room: string) => `\n\nLÄGE: IN-HOUSE (gästen är incheckad på rum ${room}).
 - Använd alltid rumsnummer ${room} när du anropar verktyg.
@@ -107,7 +109,7 @@ export const Route = createFileRoute("/api/chat")({
 
         const bookHotelService = tool({
           description: isGuest
-            ? "Bekräfta en NY rumsbokning för en gäst som ännu inte checkat in. Kalla detta först när du har samlat in syfte, datum och antal personer."
+            ? "Bekräfta en NY rumsbokning. Kalla detta FÖRST när du har samlat in: syfte, datum (ankomst+avresa), antal gäster, samt bokarens namn, e-post och telefon."
             : "Boka eller avboka en hotelltjänst – restaurangbord, spa, taxi, frukost, sen utcheckning m.m.",
           inputSchema: z.object({
             room_number: z.string().describe(isGuest ? "Använd 'guest' när gästen inte checkat in" : "Gästens rumsnummer"),
@@ -117,14 +119,41 @@ export const Route = createFileRoute("/api/chat")({
             date_time: z
               .string()
               .describe("Datum och tid i klartext, t.ex. '2026-06-10 19:30' eller '2026-07-12 till 2026-07-15'"),
+            guest_name: z.string().optional().describe("Bokarens fullständiga namn (obligatoriskt vid rumsbokning pre-check-in)"),
+            guest_email: z.string().optional().describe("Bokarens e-postadress (obligatoriskt vid rumsbokning pre-check-in)"),
+            guest_phone: z.string().optional().describe("Bokarens mobilnummer (obligatoriskt vid rumsbokning pre-check-in)"),
+            guest_count: z.number().int().positive().optional().describe("Antal gäster"),
+            purpose: z.string().optional().describe("Syftet med resan"),
           }),
-          execute: async ({ service_type, date_time }) => {
+          execute: async ({ service_type, date_time, guest_name, guest_email, guest_phone, guest_count, purpose }) => {
             if (isGuest) {
               const bookingNumber = generateBookingNumber();
+              const summary = [
+                `${service_type} – ${date_time}`,
+                guest_name && `Bokare: ${guest_name}`,
+                guest_email && `E-post: ${guest_email}`,
+                guest_phone && `Tel: ${guest_phone}`,
+                guest_count && `Antal: ${guest_count}`,
+                purpose && `Syfte: ${purpose}`,
+                `Bokningsnr: ${bookingNumber}`,
+              ]
+                .filter(Boolean)
+                .join(" · ");
               const res = await saveTransaction({
                 transaction_type: "HOTEL_SERVICE",
-                details: `${service_type} – ${date_time} (bokningsnr ${bookingNumber})`,
-                items: [{ booking_number: bookingNumber, service_type, date_time }],
+                details: summary,
+                items: [
+                  {
+                    booking_number: bookingNumber,
+                    service_type,
+                    date_time,
+                    guest_name,
+                    guest_email,
+                    guest_phone,
+                    guest_count,
+                    purpose,
+                  },
+                ],
                 status: "confirmed_booking",
               });
               return res.ok ? { ...res, booking_number: bookingNumber } : res;
