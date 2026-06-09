@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { ArrowRight, KeyRound, Sparkles } from "lucide-react";
-import logo from "@/assets/gothia-logo.png";
+import { ArrowUpRight, KeyRound, Sparkles } from "lucide-react";
+import heroImage from "@/assets/hero-towers.jpg";
 
 interface CheckInProps {
   onCheckIn: (room: string) => void;
@@ -24,114 +24,117 @@ export function CheckIn({ onCheckIn, onGuestMode }: CheckInProps) {
   };
 
   return (
-    <div className="flex min-h-dvh items-center justify-center px-6 py-12">
-      <div className="w-full max-w-md">
-        <div className="flex flex-col items-center text-center">
-          <img
-            src={logo}
-            alt="Gothia Towers"
-            className="h-20 w-20 object-contain"
-            width={512}
-            height={512}
-          />
-          <p className="mt-6 text-xs font-medium uppercase tracking-[0.35em] text-gold/80">
-            Gothia Towers
-          </p>
-          <h1 className="mt-3 font-display text-3xl font-light tracking-tight text-foreground">
-            Välkommen
-          </h1>
-          <p className="mt-3 text-sm text-muted-foreground">
-            Hur vill du börja din upplevelse hos oss?
-          </p>
+    <div className="relative min-h-dvh w-full overflow-hidden bg-background">
+      {/* Hero image */}
+      <img
+        src={heroImage}
+        alt="Gothia Towers vid solnedgång över Göteborg"
+        width={1920}
+        height={1080}
+        className="absolute inset-0 h-full w-full object-cover"
+      />
+      {/* Gradient overlays for legibility */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/30 to-background" />
+      <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-background/20 to-transparent" />
+
+      {/* Top bar */}
+      <header className="relative z-10 flex items-center justify-between px-6 py-6 sm:px-10 sm:py-8">
+        <div className="font-display text-lg font-medium tracking-wide text-foreground sm:text-xl">
+          GOTHIA <span className="text-gold">TOWERS</span>
         </div>
+        <div className="text-[10px] uppercase tracking-[0.3em] text-foreground/70 sm:text-xs">
+          Svenska Mässan · Göteborg
+        </div>
+      </header>
 
-        {mode === "choose" ? (
-          <div className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <button
-              type="button"
-              onClick={() => setMode("room")}
-              className="group flex items-center gap-3 rounded-2xl border border-border bg-surface p-4 text-left transition-all hover:border-gold/50 hover:bg-surface-elevated sm:flex-col sm:items-start sm:gap-3 sm:p-5"
-            >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gold/30 bg-gold/10 text-gold sm:h-11 sm:w-11">
-                <KeyRound className="h-5 w-5" strokeWidth={1.75} />
-              </div>
-              <div className="flex-1">
-                <div className="text-sm font-medium text-foreground">
-                  Jag har redan ett rum
-                </div>
-                <div className="mt-0.5 text-xs text-muted-foreground">
-                  Logga in med rumsnummer
-                </div>
-              </div>
-              <ArrowRight className="hidden h-4 w-4 shrink-0 text-muted-foreground/60 transition-transform group-hover:translate-x-0.5 group-hover:text-gold sm:block" />
-            </button>
+      {/* Main content */}
+      <main className="relative z-10 flex min-h-[calc(100dvh-96px)] items-end px-6 pb-12 sm:items-center sm:px-12 sm:pb-20 lg:px-20">
+        <div className="w-full max-w-2xl">
+          <p className="text-[11px] font-medium uppercase tracking-[0.4em] text-gold">
+            Digital concierge
+          </p>
+          <h1 className="mt-5 font-display text-5xl font-light leading-[0.95] tracking-tight text-foreground sm:text-6xl lg:text-7xl">
+            Välkommen till <br />
+            <span className="italic text-gold">en högre</span> våning.
+          </h1>
+          <p className="mt-6 max-w-md text-base text-foreground/75 sm:text-lg">
+            Hotell, spa och möten mitt i Göteborg. Din vistelse börjar här.
+          </p>
 
-            <button
-              type="button"
-              onClick={onGuestMode}
-              className="group flex items-center gap-3 rounded-2xl border border-border bg-surface p-4 text-left transition-all hover:border-gold/50 hover:bg-surface-elevated sm:flex-col sm:items-start sm:gap-3 sm:p-5"
-            >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gold/30 bg-gold/10 text-gold sm:h-11 sm:w-11">
-                <Sparkles className="h-5 w-5" strokeWidth={1.75} />
-              </div>
-              <div className="flex-1">
-                <div className="text-sm font-medium text-foreground">
-                  Jag vill boka rum
+          {mode === "choose" ? (
+            <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:gap-4">
+              <button
+                type="button"
+                onClick={() => setMode("room")}
+                className="group relative flex flex-1 items-center justify-between gap-4 overflow-hidden rounded-full bg-gold px-7 py-5 text-left transition-all hover:bg-gold-bright active:scale-[0.98] sm:max-w-xs"
+              >
+                <div className="flex items-center gap-3">
+                  <KeyRound className="h-5 w-5 text-gold-foreground" strokeWidth={2} />
+                  <span className="text-sm font-semibold uppercase tracking-wider text-gold-foreground">
+                    Checka in
+                  </span>
                 </div>
-                <div className="mt-0.5 text-xs text-muted-foreground">
-                  Utforska & chatta med AI
+                <ArrowUpRight className="h-5 w-5 text-gold-foreground transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </button>
+
+              <button
+                type="button"
+                onClick={onGuestMode}
+                className="group relative flex flex-1 items-center justify-between gap-4 overflow-hidden rounded-full border border-foreground/25 bg-foreground/5 px-7 py-5 text-left backdrop-blur-md transition-all hover:border-gold/60 hover:bg-foreground/10 active:scale-[0.98] sm:max-w-xs"
+              >
+                <div className="flex items-center gap-3">
+                  <Sparkles className="h-5 w-5 text-gold" strokeWidth={2} />
+                  <span className="text-sm font-semibold uppercase tracking-wider text-foreground">
+                    Boka rum
+                  </span>
                 </div>
-              </div>
-              <ArrowRight className="hidden h-4 w-4 shrink-0 text-muted-foreground/60 transition-transform group-hover:translate-x-0.5 group-hover:text-gold sm:block" />
-            </button>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="mt-10 space-y-4">
-            <div>
+                <ArrowUpRight className="h-5 w-5 text-foreground/70 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-gold" />
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="mt-10 max-w-md space-y-4">
               <label
                 htmlFor="room"
-                className="text-xs font-medium uppercase tracking-[0.25em] text-muted-foreground"
+                className="block text-[10px] font-medium uppercase tracking-[0.35em] text-foreground/60"
               >
                 Rumsnummer
               </label>
-              <input
-                id="room"
-                type="text"
-                inputMode="numeric"
-                autoFocus
-                value={room}
-                onChange={(e) => setRoom(e.target.value.replace(/\D/g, ""))}
-                placeholder="t.ex. 1204"
-                className="mt-2 w-full rounded-xl border border-border bg-surface px-5 py-4 text-center font-display text-2xl tracking-[0.4em] text-foreground placeholder:text-muted-foreground/40 focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/30"
-              />
+              <div className="flex gap-3">
+                <input
+                  id="room"
+                  type="text"
+                  inputMode="numeric"
+                  autoFocus
+                  value={room}
+                  onChange={(e) => setRoom(e.target.value.replace(/\D/g, ""))}
+                  placeholder="1204"
+                  className="flex-1 rounded-full border border-foreground/25 bg-foreground/5 px-6 py-4 font-display text-2xl tracking-[0.3em] text-foreground backdrop-blur-md placeholder:text-foreground/30 focus:border-gold focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  className="rounded-full bg-gold px-7 text-sm font-semibold uppercase tracking-wider text-gold-foreground transition-all hover:bg-gold-bright active:scale-[0.98]"
+                >
+                  Logga in
+                </button>
+              </div>
               {error && (
-                <p className="mt-2 text-center text-xs text-destructive">{error}</p>
+                <p className="text-xs text-destructive">{error}</p>
               )}
-            </div>
-            <button
-              type="submit"
-              className="w-full rounded-xl bg-gold py-4 text-sm font-medium uppercase tracking-[0.25em] text-gold-foreground transition-all hover:bg-gold-bright active:scale-[0.98]"
-            >
-              Checka in
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setMode("choose");
-                setError(null);
-                setRoom("");
-              }}
-              className="w-full text-center text-[11px] uppercase tracking-[0.3em] text-muted-foreground/70 hover:text-gold"
-            >
-              ← Tillbaka
-            </button>
-          </form>
-        )}
-
-        <p className="mt-10 text-center text-[11px] uppercase tracking-[0.3em] text-muted-foreground/60">
-          Svenska Mässan · Göteborg
-        </p>
-      </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setMode("choose");
+                  setError(null);
+                  setRoom("");
+                }}
+                className="text-[11px] uppercase tracking-[0.3em] text-foreground/60 hover:text-gold"
+              >
+                ← Tillbaka
+              </button>
+            </form>
+          )}
+        </div>
+      </main>
     </div>
   );
 }
