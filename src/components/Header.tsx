@@ -15,8 +15,8 @@ export function Header({ roomNumber, onCheckOut, onNavigateHome }: HeaderProps) 
 
   const chatUrl =
     typeof window !== "undefined"
-      ? `${window.location.origin}/?room=${roomNumber}`
-      : `/?room=${roomNumber}`;
+      ? `${window.location.origin}/gastrum?room=${roomNumber}`
+      : `/gastrum?room=${roomNumber}`;
 
   return (
     <header className="sticky top-0 z-20 border-b border-border/60 bg-background/70 backdrop-blur-xl">
