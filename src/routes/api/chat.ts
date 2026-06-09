@@ -53,11 +53,100 @@ export const Route = createFileRoute("/api/chat")({
         const gateway = createLovableAiGatewayProvider(key);
         const model = gateway("google/gemini-3-flash-preview");
 
+        const saveTransaction = async (input: {
+          transaction_type: "WORK_REQUEST" | "DEBITERA_MINIBAR" | "HOTEL_SERVICE";
+          details: string;
+          items?: Array<Record<string, unknown>>;
+        }) => {
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          const { data, error } = await supabaseAdmin
+            .from("guest_transactions")
+            .insert({
+              room_number: roomNumber,
+              transaction_type: input.transaction_type,
+              details: input.details,
+              items: input.items ?? [],
+              status: "pending",
+            })
+            .select("id")
+            .single();
+          if (error) {
+            return { ok: false as const, message: "Kunde inte registrera." };
+          }
+          return {
+            ok: true as const,
+            id: data.id,
+            transaction_type: input.transaction_type,
+            details: input.details,
+            items: input.items ?? [],
+            confirmation: "Mottaget av hotellet",
+          };
+        };
+
+        const tools = {
+          request_housekeeping: tool({
+            description:
+              "Skapa en städ-/felanmälan eller begäran om extra utrustning (handdukar, kuddar, städning, reparation). Använd när gästen ber om något som rör städning eller rummets skick.",
+            inputSchema: z.object({
+              room_number: z.string().describe("Gästens rumsnummer"),
+              details: z
+                .string()
+                .describe("Tydlig sammanfattning på svenska av vad gästen önskar"),
+            }),
+            execute: async ({ details }) =>
+              saveTransaction({ transaction_type: "WORK_REQUEST", details }),
+          }),
+          refill_minibar: tool({
+            description:
+              "Rapportera minibar-konsumtion eller begär påfyllning. Items beskriver vad som ska påfyllas eller debiteras.",
+            inputSchema: z.object({
+              room_number: z.string(),
+              items: z
+                .array(
+                  z.object({
+                    name: z.string().describe("Produktnamn, t.ex. 'Coca-Cola'"),
+                    qty: z.number().int().positive().describe("Antal"),
+                  }),
+                )
+                .min(1),
+            }),
+            execute: async ({ items }) => {
+              const summary = items
+                .map((it) => `${it.qty}× ${it.name}`)
+                .join(", ");
+              return saveTransaction({
+                transaction_type: "DEBITERA_MINIBAR",
+                details: `Minibar: ${summary}`,
+                items,
+              });
+            },
+          }),
+          book_hotel_service: tool({
+            description:
+              "Boka eller avboka en hotelltjänst – restaurangbord, spa, taxi, frukost, sen utcheckning m.m.",
+            inputSchema: z.object({
+              room_number: z.string(),
+              service_type: z
+                .string()
+                .describe("Typ av tjänst, t.ex. 'restaurangbord Heaven 23', 'taxi', 'spa'"),
+              date_time: z
+                .string()
+                .describe("Datum och tid i klartext, t.ex. '2026-06-10 19:30'"),
+            }),
+            execute: async ({ service_type, date_time }) =>
+              saveTransaction({
+                transaction_type: "HOTEL_SERVICE",
+                details: `${service_type} – ${date_time}`,
+              }),
+          }),
+        };
+
         const result = streamText({
           model,
-          system: SYSTEM_PROMPT.replace("{ROOM}", roomNumber) +
-            `\n\nGästens rumsnummer: ${roomNumber}.`,
+          system: SYSTEM_PROMPT + `\n\nGästens rumsnummer: ${roomNumber}. Använd alltid detta rumsnummer när du anropar verktyg.`,
           messages: await convertToModelMessages(messages),
+          tools,
+          stopWhen: stepCountIs(50),
         });
 
         return result.toUIMessageStreamResponse({
