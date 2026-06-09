@@ -73,6 +73,19 @@ export function CheckIn({ onCheckIn, onGuestMode }: CheckInProps) {
           </button>
         </form>
 
+        <div className="mt-6 flex items-center gap-3 text-[10px] uppercase tracking-[0.3em] text-muted-foreground/50">
+          <span className="h-px flex-1 bg-border" />
+          eller
+          <span className="h-px flex-1 bg-border" />
+        </div>
+
+        <button
+          type="button"
+          onClick={onGuestMode}
+          className="mt-4 w-full rounded-xl border border-gold/30 bg-transparent py-3.5 text-xs font-medium uppercase tracking-[0.25em] text-gold transition-all hover:border-gold/60 hover:bg-gold/5"
+        >
+          Jag vill boka rum
+
         <p className="mt-8 text-center text-[11px] uppercase tracking-[0.3em] text-muted-foreground/60">
           Svenska Mässan · Göteborg
         </p>
