@@ -11,7 +11,7 @@ interface CheckInProps {
   onCheckOut: () => void;
 }
 
-type Mode = "choose" | "checkin" | "checkin-success" | "checkout" | "checkout-confirm";
+type Mode = "choose" | "checkin" | "checkin-success" | "checkout" | "checkout-confirm" | "booking-payment";
 
 export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onCheckOut }: CheckInProps) {
   const [mode, setMode] = useState<Mode>("choose");
@@ -19,6 +19,10 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
   const [assignedRoom, setAssignedRoom] = useState("");
   const [checkOutRoom, setCheckOutRoom] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [cardName, setCardName] = useState("");
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardExpiry, setCardExpiry] = useState("");
+  const [cardCvc, setCardCvc] = useState("");
 
   const handleCheckInSubmit = (e: React.FormEvent) => {
     e.preventDefault();
