@@ -153,12 +153,12 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
           </p>
 
           {mode === "choose" && (
-            <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
+            <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:gap-3">
               {storedRoom && (
                 <button
                   type="button"
                   onClick={onContinue}
-                  className="group relative flex flex-1 items-center justify-between gap-4 overflow-hidden rounded-full bg-gold px-7 py-5 text-left transition-all hover:bg-gold-bright active:scale-[0.98] sm:max-w-[220px]"
+                  className="group relative flex flex-1 items-center justify-between gap-3 overflow-hidden rounded-full bg-gold px-5 py-4 text-left transition-all hover:bg-gold-bright active:scale-[0.98] sm:max-w-[200px]"
                 >
                   <div className="flex flex-col">
                     <span className="text-sm font-semibold uppercase tracking-wider text-gold-foreground">
@@ -176,7 +176,7 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
                 <button
                   type="button"
                   onClick={() => setMode("checkin")}
-                  className="group relative flex flex-1 items-center justify-between gap-4 overflow-hidden rounded-full bg-gold px-7 py-5 text-left shadow-[0_10px_40px_-12px_rgba(202,168,99,0.6)] ring-1 ring-gold/40 transition-all hover:bg-gold-bright active:scale-[0.98] sm:max-w-[240px]"
+                  className="group relative flex flex-1 items-center justify-between gap-3 overflow-hidden rounded-full bg-gold px-5 py-4 text-left shadow-[0_10px_40px_-12px_rgba(202,168,99,0.6)] ring-1 ring-gold/40 transition-all hover:bg-gold-bright active:scale-[0.98] sm:max-w-[200px]"
                 >
                   <div className="flex items-center gap-3">
                     <KeyRound className="h-5 w-5 text-gold-foreground" strokeWidth={2} />
@@ -192,7 +192,7 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
                 <button
                   type="button"
                   onClick={() => setMode("checkin")}
-                  className="group relative flex flex-1 items-center justify-between gap-4 overflow-hidden rounded-full border border-foreground/25 bg-foreground/5 px-7 py-5 text-left backdrop-blur-md transition-all hover:border-gold/60 hover:bg-foreground/10 active:scale-[0.98] sm:max-w-[220px]"
+                  className="group relative flex flex-1 items-center justify-between gap-3 overflow-hidden rounded-full border border-foreground/25 bg-foreground/5 px-5 py-4 text-left backdrop-blur-md transition-all hover:border-gold/60 hover:bg-foreground/10 active:scale-[0.98] sm:max-w-[200px]"
                 >
                   <div className="flex items-center gap-3">
                     <KeyRound className="h-5 w-5 text-gold" strokeWidth={2} />
@@ -207,7 +207,7 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
               <button
                 type="button"
                 onClick={handleBookRoom}
-                className="group relative flex flex-1 items-center justify-between gap-4 overflow-hidden rounded-full border border-foreground/25 bg-foreground/5 px-7 py-5 text-left backdrop-blur-md transition-all hover:border-gold/60 hover:bg-foreground/10 active:scale-[0.98] sm:max-w-[220px]"
+                className="group relative flex flex-1 items-center justify-between gap-3 overflow-hidden rounded-full border border-foreground/25 bg-foreground/5 px-5 py-4 text-left backdrop-blur-md transition-all hover:border-gold/60 hover:bg-foreground/10 active:scale-[0.98] sm:max-w-[200px]"
               >
                 <div className="flex items-center gap-3">
                   <Sparkles className="h-5 w-5 text-gold" strokeWidth={2} />
@@ -224,7 +224,7 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
                   setMode("checkout");
                   if (storedRoom) setCheckOutRoom(storedRoom);
                 }}
-                className="group relative flex flex-1 items-center justify-between gap-4 overflow-hidden rounded-full border border-foreground/25 bg-foreground/5 px-7 py-5 text-left backdrop-blur-md transition-all hover:border-gold/60 hover:bg-foreground/10 active:scale-[0.98] sm:max-w-[220px]"
+                className="group relative flex flex-1 items-center justify-between gap-3 overflow-hidden rounded-full border border-foreground/25 bg-foreground/5 px-5 py-4 text-left backdrop-blur-md transition-all hover:border-gold/60 hover:bg-foreground/10 active:scale-[0.98] sm:max-w-[200px]"
               >
                 <div className="flex items-center gap-3">
                   <LogOut className="h-5 w-5 text-gold" strokeWidth={2} />
