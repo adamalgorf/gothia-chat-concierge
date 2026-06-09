@@ -226,23 +226,7 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
                 <ArrowUpRight className="h-5 w-5 text-foreground/70 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-gold" />
               </button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setError(null);
-                  if (storedRoom) setGuestRoomInput(storedRoom);
-                  setMode("guestroom");
-                }}
-                className="group relative flex flex-1 items-center justify-between gap-3 overflow-hidden rounded-full border border-foreground/25 bg-foreground/5 px-5 py-4 text-left backdrop-blur-md transition-all hover:border-gold/60 hover:bg-foreground/10 active:scale-[0.98] sm:max-w-[200px]"
-              >
-                <div className="flex items-center gap-3">
-                  <DoorOpen className="h-5 w-5 text-gold" strokeWidth={2} />
-                  <span className="text-sm font-semibold uppercase tracking-wider text-foreground">
-                    Gästrum
-                  </span>
-                </div>
-                <ArrowUpRight className="h-5 w-5 text-foreground/70 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-gold" />
-              </button>
+
 
 
               <button
@@ -568,52 +552,7 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
             </form>
           )}
 
-          {mode === "guestroom" && (
-            <form onSubmit={handleGuestRoomSubmit} className="mt-10 max-w-md space-y-4">
-              <div className="flex items-center gap-3">
-                <DoorOpen className="h-6 w-6 text-gold" strokeWidth={2} />
-                <h2 className="font-display text-lg font-medium tracking-wide text-foreground">
-                  Chatta från ditt rum
-                </h2>
-              </div>
-              <p className="text-xs text-foreground/60">
-                Ange rumsnumret som står på din nyckelkortshållare eller på TV:n. Du får direkt tillgång till
-                room service, städning och concierge — utan att checka in på nytt.
-              </p>
-              <label
-                htmlFor="guestroom-number"
-                className="block text-[10px] font-medium uppercase tracking-[0.35em] text-foreground/60"
-              >
-                Rumsnummer
-              </label>
-              <div className="flex gap-3">
-                <input
-                  id="guestroom-number"
-                  type="text"
-                  inputMode="numeric"
-                  autoFocus
-                  value={guestRoomInput}
-                  onChange={(e) => setGuestRoomInput(e.target.value.replace(/\D/g, ""))}
-                  placeholder="1204"
-                  className="flex-1 rounded-full border border-foreground/25 bg-foreground/5 px-6 py-4 font-display text-2xl tracking-[0.3em] text-foreground backdrop-blur-md placeholder:text-foreground/30 focus:border-gold focus:outline-none"
-                />
-                <button
-                  type="submit"
-                  className="rounded-full bg-gold px-7 text-sm font-semibold uppercase tracking-wider text-gold-foreground transition-all hover:bg-gold-bright active:scale-[0.98]"
-                >
-                  Anslut
-                </button>
-              </div>
-              {error && <p className="text-xs text-destructive">{error}</p>}
-              <button
-                type="button"
-                onClick={resetToChoose}
-                className="text-[11px] uppercase tracking-[0.3em] text-foreground/60 hover:text-gold"
-              >
-                ← Tillbaka
-              </button>
-            </form>
-          )}
+
         </div>
 
       </main>
