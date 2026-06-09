@@ -143,7 +143,7 @@ export function GuestChat({ roomNumber, initialMessages, onBookingConfirmed }: G
   return (
     <div className="flex h-[calc(100dvh-64px)] flex-col">
       {/* Messages */}
-      <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto px-4 py-6 sm:px-6">
+      <div ref={scrollRef} onScroll={handleScroll} className="relative flex-1 overflow-y-auto px-4 py-6 sm:px-6">
         <div className="mx-auto max-w-2xl space-y-6">
           {isEmpty && (
             <div className="flex flex-col items-center pt-8 text-center">
