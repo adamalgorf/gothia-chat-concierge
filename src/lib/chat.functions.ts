@@ -6,7 +6,7 @@ const RoomSchema = z.object({
 });
 
 export const getMessagesForRoom = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => RoomSchema.parse(data))
+  .validator((data: unknown) => RoomSchema.parse(data))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows, error } = await supabaseAdmin

@@ -28,7 +28,7 @@ export type GuestProfile = {
 };
 
 export const saveGuestProfile = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => ProfileSchema.parse(data))
+  .validator((data: unknown) => ProfileSchema.parse(data))
   .handler(async ({ data }): Promise<{ ok: true; id: string }> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
@@ -66,7 +66,7 @@ const CheckOutSchema = z.object({
 });
 
 export const checkOutGuest = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => CheckOutSchema.parse(data))
+  .validator((data: unknown) => CheckOutSchema.parse(data))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin

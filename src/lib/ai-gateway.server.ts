@@ -1,11 +1,11 @@
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 
-export function createLovableAiGatewayProvider(apiKey: string) {
+export function createOpenAiProvider(apiKey: string, baseURL = "https://api.openai.com/v1") {
   return createOpenAICompatible({
-    name: "lovable",
-    baseURL: "https://ai.gateway.lovable.dev/v1",
+    name: "openai",
+    baseURL,
     headers: {
-      "Lovable-API-Key": apiKey,
+      Authorization: `Bearer ${apiKey}`,
     },
   });
 }

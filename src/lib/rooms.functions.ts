@@ -40,7 +40,7 @@ const UpdateRoomSchema = z.object({
 });
 
 export const updateRoom = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => UpdateRoomSchema.parse(d))
+  .validator((d: unknown) => UpdateRoomSchema.parse(d))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const patch: {
