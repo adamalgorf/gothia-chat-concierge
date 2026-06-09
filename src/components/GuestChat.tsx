@@ -1,7 +1,7 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Mic, MicOff, Send, Sparkles } from "lucide-react";
+import { Check, Mic, MicOff, Send, Sparkles } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 interface GuestChatProps {
