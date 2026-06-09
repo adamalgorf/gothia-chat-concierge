@@ -64,6 +64,58 @@ function isOpen(t: Ticket) {
   return t.status !== "done";
 }
 
+type Priority = "high" | "normal" | "low";
+
+const PRIORITY_META: Record<
+  Priority,
+  { label: string; rank: number; icon: typeof AlertTriangle; chip: string; stripe: string; sort: number }
+> = {
+  high: {
+    label: "Hög prio",
+    rank: 0,
+    icon: AlertTriangle,
+    chip: "border-rose-400/40 bg-rose-400/10 text-rose-200",
+    stripe: "bg-rose-400",
+    sort: 0,
+  },
+  normal: {
+    label: "Normal",
+    rank: 1,
+    icon: ArrowUp,
+    chip: "border-amber-400/30 bg-amber-400/10 text-amber-200",
+    stripe: "bg-amber-400",
+    sort: 1,
+  },
+  low: {
+    label: "Låg",
+    rank: 2,
+    icon: Minus,
+    chip: "border-foreground/20 bg-foreground/5 text-foreground/60",
+    stripe: "bg-foreground/40",
+    sort: 2,
+  },
+};
+
+const URGENT_KEYWORDS = [
+  "akut", "läck", "leck", "trasig", "trasigt", "sönder", "sonder", "stopp",
+  "översvämn", "oversvamn", "lukt", "rök", "rok", "brand", "blod", "skadad",
+  "allergi", "läkare", "lakare", "ambulans", "fastnat", "kallt", "ingen värme",
+  "ingen el", "elavbrott",
+];
+
+const HIGH_PRIORITY_TYPES = new Set<string>([]);
+const LOW_PRIORITY_TYPES = new Set<string>(["DEBITERA_MINIBAR"]);
+
+function getPriority(t: Ticket): Priority {
+  const text = `${t.details ?? ""}`.toLowerCase();
+  if (URGENT_KEYWORDS.some((k) => text.includes(k))) return "high";
+  if (HIGH_PRIORITY_TYPES.has(t.transaction_type)) return "high";
+  if (LOW_PRIORITY_TYPES.has(t.transaction_type)) return "low";
+  if (t.transaction_type === "HOTEL_SERVICE") return "normal";
+  if (t.transaction_type === "WORK_REQUEST") return "low";
+  return "normal";
+}
+
 function timeAgo(iso: string) {
   const diff = Date.now() - new Date(iso).getTime();
   const m = Math.floor(diff / 60000);
