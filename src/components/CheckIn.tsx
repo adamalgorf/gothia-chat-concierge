@@ -304,14 +304,14 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
           )}
 
           {mode === "checkin" && (
-            <form onSubmit={handleCheckInSubmit} className="mt-10 max-w-md space-y-4">
-              <label
-                htmlFor="booking"
-                className="block text-[10px] font-medium uppercase tracking-[0.35em] text-foreground/60"
-              >
-                Bokningsnummer eller efternamn
-              </label>
-              <div className="flex gap-3">
+            <form onSubmit={handleCheckInSubmit} className="mt-10 max-w-md space-y-5">
+              <div>
+                <label
+                  htmlFor="booking"
+                  className="block text-[10px] font-medium uppercase tracking-[0.35em] text-foreground/60"
+                >
+                  Bokningsnummer eller efternamn
+                </label>
                 <input
                   id="booking"
                   type="text"
@@ -319,28 +319,77 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
                   value={booking}
                   onChange={(e) => setBooking(e.target.value)}
                   placeholder="GT-48201 / Andersson"
-                  className="flex-1 rounded-full border border-foreground/25 bg-foreground/5 px-6 py-4 font-display text-lg text-foreground backdrop-blur-md placeholder:text-foreground/30 focus:border-gold focus:outline-none"
+                  className="mt-2 w-full rounded-xl border border-foreground/25 bg-foreground/5 px-5 py-3.5 font-display text-base text-foreground backdrop-blur-md placeholder:text-foreground/30 focus:border-gold focus:outline-none"
                 />
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <label htmlFor="guest-name" className="block text-[10px] font-medium uppercase tracking-[0.35em] text-foreground/60">
+                    Fullständigt namn
+                  </label>
+                  <input
+                    id="guest-name"
+                    type="text"
+                    autoComplete="name"
+                    value={guestName}
+                    onChange={(e) => setGuestName(e.target.value)}
+                    placeholder="Anna Andersson"
+                    className="mt-2 w-full rounded-xl border border-foreground/25 bg-foreground/5 px-5 py-3.5 text-base text-foreground backdrop-blur-md placeholder:text-foreground/30 focus:border-gold focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="guest-email" className="block text-[10px] font-medium uppercase tracking-[0.35em] text-foreground/60">
+                    E-post
+                  </label>
+                  <input
+                    id="guest-email"
+                    type="email"
+                    autoComplete="email"
+                    value={guestEmail}
+                    onChange={(e) => setGuestEmail(e.target.value)}
+                    placeholder="anna@exempel.se"
+                    className="mt-2 w-full rounded-xl border border-foreground/25 bg-foreground/5 px-5 py-3.5 text-base text-foreground backdrop-blur-md placeholder:text-foreground/30 focus:border-gold focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="guest-phone" className="block text-[10px] font-medium uppercase tracking-[0.35em] text-foreground/60">
+                    Telefon
+                  </label>
+                  <input
+                    id="guest-phone"
+                    type="tel"
+                    autoComplete="tel"
+                    value={guestPhone}
+                    onChange={(e) => setGuestPhone(e.target.value)}
+                    placeholder="+46 70 123 45 67"
+                    className="mt-2 w-full rounded-xl border border-foreground/25 bg-foreground/5 px-5 py-3.5 text-base text-foreground backdrop-blur-md placeholder:text-foreground/30 focus:border-gold focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <p className="text-xs text-foreground/50">
+                Dina uppgifter kopplas till ditt rum så vår personal kan hjälpa dig snabbare.
+              </p>
+
+              {error && <p className="text-xs text-destructive">{error}</p>}
+
+              <div className="flex flex-col gap-3 sm:flex-row">
                 <button
                   type="submit"
-                  className="rounded-full bg-gold px-7 text-sm font-semibold uppercase tracking-wider text-gold-foreground transition-all hover:bg-gold-bright active:scale-[0.98]"
+                  disabled={isSaving}
+                  className="flex-1 rounded-full bg-gold px-7 py-4 text-sm font-semibold uppercase tracking-wider text-gold-foreground transition-all hover:bg-gold-bright active:scale-[0.98] disabled:opacity-60"
                 >
-                  Checka in
+                  {isSaving ? "Checkar in..." : "Checka in"}
+                </button>
+                <button
+                  type="button"
+                  onClick={resetToChoose}
+                  className="rounded-full border border-foreground/25 bg-foreground/5 px-7 py-4 text-sm font-semibold uppercase tracking-wider text-foreground backdrop-blur-md transition-all hover:border-gold/60 hover:bg-foreground/10"
+                >
+                  ← Tillbaka
                 </button>
               </div>
-              <p className="text-xs text-foreground/50">
-                Vi tilldelar ditt rum direkt efter incheckning.
-              </p>
-              {error && (
-                <p className="text-xs text-destructive">{error}</p>
-              )}
-              <button
-                type="button"
-                onClick={resetToChoose}
-                className="text-[11px] uppercase tracking-[0.3em] text-foreground/60 hover:text-gold"
-              >
-                ← Tillbaka
-              </button>
             </form>
           )}
 
