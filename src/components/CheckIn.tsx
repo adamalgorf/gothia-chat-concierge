@@ -159,7 +159,7 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
 
               <button
                 type="button"
-                onClick={onGuestMode}
+                onClick={handleBookRoom}
                 className="group relative flex flex-1 items-center justify-between gap-4 overflow-hidden rounded-full border border-foreground/25 bg-foreground/5 px-7 py-5 text-left backdrop-blur-md transition-all hover:border-gold/60 hover:bg-foreground/10 active:scale-[0.98] sm:max-w-[220px]"
               >
                 <div className="flex items-center gap-3">
