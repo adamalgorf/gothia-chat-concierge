@@ -7,6 +7,7 @@ import ReactMarkdown from "react-markdown";
 interface GuestChatProps {
   roomNumber: string;
   initialMessages: UIMessage[];
+  onBookingConfirmed?: (bookingNumber: string) => void;
 }
 
 // Minimal typing for browser SpeechRecognition
