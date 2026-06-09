@@ -2,6 +2,8 @@ import { useState } from "react";
 import { ArrowUpRight, CheckCircle2, CreditCard, KeyRound, LogOut, Smartphone, Sparkles } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
+import { saveGuestProfile, checkOutGuest } from "@/lib/guests.functions";
 import heroImage from "@/assets/hero-towers.jpg";
 
 const KEY_BASE_URL = "https://key.gothiatowers.app/unlock";
