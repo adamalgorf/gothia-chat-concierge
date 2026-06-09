@@ -102,7 +102,7 @@ function Index() {
 
   return (
     <div className="min-h-dvh bg-background">
-      <Header roomNumber={room} onCheckOut={handleCheckOut} />
+      <Header roomNumber={room} onCheckOut={handleCheckOut} onNavigateHome={handleCheckOut} />
       {checkInNotice && (
         <div className="border-b border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-center text-xs font-medium tracking-wide text-emerald-300 animate-fade-in">
           ✓ {checkInNotice}
