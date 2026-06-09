@@ -38,6 +38,45 @@ export type Database = {
         }
         Relationships: []
       }
+      guest_profiles: {
+        Row: {
+          booking_reference: string | null
+          checked_in_at: string
+          checked_out_at: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          phone: string
+          room_number: string
+          updated_at: string
+        }
+        Insert: {
+          booking_reference?: string | null
+          checked_in_at?: string
+          checked_out_at?: string | null
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          phone: string
+          room_number: string
+          updated_at?: string
+        }
+        Update: {
+          booking_reference?: string | null
+          checked_in_at?: string
+          checked_out_at?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          phone?: string
+          room_number?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       guest_transactions: {
         Row: {
           assigned_to: string | null

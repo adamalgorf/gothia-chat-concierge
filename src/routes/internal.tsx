@@ -15,6 +15,7 @@ import {
   UtensilsCrossed,
 } from "lucide-react";
 import { listTickets, STAFF_MEMBERS, updateTicket, type Ticket } from "@/lib/tickets.functions";
+import { listActiveGuests } from "@/lib/guests.functions";
 
 export const Route = createFileRoute("/internal")({
   ssr: false,
@@ -73,6 +74,7 @@ function timeAgo(iso: string) {
 
 function InternalPortal() {
   const fetchTickets = useServerFn(listTickets);
+  const fetchGuests = useServerFn(listActiveGuests);
   const patchTicket = useServerFn(updateTicket);
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<Filter>("open");
@@ -82,6 +84,20 @@ function InternalPortal() {
     queryFn: () => fetchTickets(),
     refetchInterval: 5000,
   });
+
+  const guestsQuery = useQuery({
+    queryKey: ["internal-guests"],
+    queryFn: () => fetchGuests(),
+    refetchInterval: 15000,
+  });
+
+  const guestsByRoom = useMemo(() => {
+    const map = new Map<string, { name: string; email: string; phone: string }>();
+    for (const g of guestsQuery.data ?? []) {
+      map.set(g.room_number, { name: g.full_name, email: g.email, phone: g.phone });
+    }
+    return map;
+  }, [guestsQuery.data]);
 
   const mutation = useMutation({
     mutationFn: (vars: { id: string; status?: string; assigned_to?: string | null }) =>
@@ -242,6 +258,26 @@ function InternalPortal() {
                       </div>
 
                       <p className="mt-2 text-sm leading-relaxed text-foreground/85 sm:text-[15px]">{t.details}</p>
+
+                      {guestsByRoom.get(t.room_number) && (
+                        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-foreground/55">
+                          <span className="font-medium text-foreground/80">
+                            {guestsByRoom.get(t.room_number)!.name}
+                          </span>
+                          <a
+                            href={`mailto:${guestsByRoom.get(t.room_number)!.email}`}
+                            className="hover:text-gold"
+                          >
+                            {guestsByRoom.get(t.room_number)!.email}
+                          </a>
+                          <a
+                            href={`tel:${guestsByRoom.get(t.room_number)!.phone}`}
+                            className="hover:text-gold"
+                          >
+                            {guestsByRoom.get(t.room_number)!.phone}
+                          </a>
+                        </div>
+                      )}
 
                       <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-foreground/50">
                         <span>{timeAgo(t.created_at)} sedan</span>
