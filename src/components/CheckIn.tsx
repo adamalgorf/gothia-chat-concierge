@@ -85,6 +85,9 @@ export function CheckIn({ onCheckIn, onGuestMode }: CheckInProps) {
           className="mt-4 w-full rounded-xl border border-gold/30 bg-transparent py-3.5 text-xs font-medium uppercase tracking-[0.25em] text-gold transition-all hover:border-gold/60 hover:bg-gold/5"
         >
           Jag vill boka rum
+        </button>
+
+
 
         <p className="mt-8 text-center text-[11px] uppercase tracking-[0.3em] text-muted-foreground/60">
           Svenska Mässan · Göteborg
