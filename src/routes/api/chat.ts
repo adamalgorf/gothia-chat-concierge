@@ -4,12 +4,35 @@ import { z } from "zod";
 import { createOpenAiProvider } from "@/lib/ai-gateway.server";
 import { extractTextFromMessage, saveChatMessage, saveLastUserMessage } from "@/lib/chat/chat-history.server";
 import { buildChatSystemPrompt } from "@/lib/chat/chat-prompts";
+import { detectInHouseServiceRequest } from "@/lib/chat/service-request-detector";
 import { saveGuestTransaction, type TransactionType } from "@/lib/transactions.server";
 
 
 function generateBookingNumber() {
   const n = Math.floor(100000 + Math.random() * 900000);
   return `GT-${n}`;
+}
+
+function createTextStreamResponse(text: string): Response {
+  const chunks = [
+    { type: "start" },
+    { type: "start-step" },
+    { type: "text-start", id: "txt-0" },
+    { type: "text-delta", id: "txt-0", delta: text },
+    { type: "text-end", id: "txt-0" },
+    { type: "finish-step" },
+    { type: "finish", finishReason: "stop" },
+  ];
+
+  const body = `${chunks.map((chunk) => `data: ${JSON.stringify(chunk)}\n\n`).join("")}data: [DONE]\n\n`;
+
+  return new Response(body, {
+    headers: {
+      "content-type": "text/event-stream; charset=utf-8",
+      "cache-control": "no-cache",
+      connection: "keep-alive",
+    },
+  });
 }
 
 export const Route = createFileRoute("/api/chat")({
@@ -29,16 +52,43 @@ export const Route = createFileRoute("/api/chat")({
           return new Response("Bad request", { status: 400 });
         }
 
+        if (!isGuest) {
+          await saveLastUserMessage({ roomNumber, messages });
+
+          const lastUserMessage = [...messages].reverse().find((message) => message.role === "user");
+          const serviceRequest = detectInHouseServiceRequest({
+            text: extractTextFromMessage(lastUserMessage),
+            roomNumber,
+          });
+
+          if (serviceRequest) {
+            const saved = await saveGuestTransaction({
+              roomNumber,
+              transactionType: serviceRequest.transactionType,
+              details: serviceRequest.details,
+              status: "pending",
+              confirmation: serviceRequest.confirmation,
+            });
+            const reply = saved.ok
+              ? serviceRequest.confirmation
+              : "Jag kunde inte registrera ärendet just nu. Försök igen om en stund.";
+
+            await saveChatMessage({
+              roomNumber,
+              role: "assistant",
+              content: reply,
+            });
+
+            return createTextStreamResponse(reply);
+          }
+        }
+
         const key = process.env.OPENAI_API_KEY;
         if (!key) {
           return new Response("AI concierge saknar OPENAI_API_KEY. Lägg till nyckeln i .env och starta om Docker.", {
             status: 503,
             headers: { "content-type": "text/plain; charset=utf-8" },
           });
-        }
-
-        if (!isGuest) {
-          await saveLastUserMessage({ roomNumber, messages });
         }
 
         const openai = createOpenAiProvider(key, process.env.OPENAI_BASE_URL);
