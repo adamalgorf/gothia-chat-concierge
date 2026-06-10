@@ -69,9 +69,18 @@ export function detectInHouseServiceRequest(input: {
   roomNumber: string;
 }): DetectedServiceRequest | null {
   const text = input.text.trim();
-  if (!text) return null;
+  if (!text) {
+    console.info("[ServiceRequestDetector] Empty message, no service request detected", {
+      roomNumber: input.roomNumber,
+    });
+    return null;
+  }
 
   if (MINIBAR_PATTERNS.some((pattern) => pattern.test(text))) {
+    console.info("[ServiceRequestDetector] Detected minibar request", {
+      roomNumber: input.roomNumber,
+      messagePreview: text.slice(0, 120),
+    });
     return {
       transactionType: "DEBITERA_MINIBAR",
       details: normalizeDetails(text, input.roomNumber),
@@ -83,6 +92,10 @@ export function detectInHouseServiceRequest(input: {
     HOUSEKEEPING_PATTERNS.some((pattern) => pattern.test(text)) ||
     GENERAL_SERVICE_PATTERNS.some((pattern) => pattern.test(text))
   ) {
+    console.info("[ServiceRequestDetector] Detected work request", {
+      roomNumber: input.roomNumber,
+      messagePreview: text.slice(0, 120),
+    });
     return {
       transactionType: "WORK_REQUEST",
       details: normalizeDetails(text, input.roomNumber),
@@ -90,5 +103,9 @@ export function detectInHouseServiceRequest(input: {
     };
   }
 
+  console.info("[ServiceRequestDetector] No service request detected", {
+    roomNumber: input.roomNumber,
+    messagePreview: text.slice(0, 120),
+  });
   return null;
 }
