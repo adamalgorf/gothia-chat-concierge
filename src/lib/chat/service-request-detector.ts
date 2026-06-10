@@ -31,6 +31,32 @@ const MINIBAR_PATTERNS = [
   /mini-bar/i,
 ];
 
+const GENERAL_SERVICE_PATTERNS = [
+  /towel/i,
+  /pillow/i,
+  /duvet/i,
+  /blanket/i,
+  /sheet/i,
+  /clean/i,
+  /housekeeping/i,
+  /toilet paper/i,
+  /soap/i,
+  /shampoo/i,
+  /broken/i,
+  /maintenance/i,
+  /repair/i,
+  /doesn'?t work/i,
+  /not working/i,
+  /leak/i,
+  /blocked/i,
+  /clogged/i,
+  /service request/i,
+  /create.*(request|ticket|case|issue)/i,
+  /register.*(request|ticket|case|issue)/i,
+  /submit.*(request|ticket|case|issue)/i,
+  /samfex/i,
+];
+
 function normalizeDetails(text: string, roomNumber: string): string {
   const cleanText = text.replace(/\s+/g, " ").trim();
   return cleanText.toLowerCase().includes(`rum ${roomNumber}`)
@@ -53,7 +79,10 @@ export function detectInHouseServiceRequest(input: {
     };
   }
 
-  if (HOUSEKEEPING_PATTERNS.some((pattern) => pattern.test(text))) {
+  if (
+    HOUSEKEEPING_PATTERNS.some((pattern) => pattern.test(text)) ||
+    GENERAL_SERVICE_PATTERNS.some((pattern) => pattern.test(text))
+  ) {
     return {
       transactionType: "WORK_REQUEST",
       details: normalizeDetails(text, input.roomNumber),
