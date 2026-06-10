@@ -43,7 +43,7 @@ const SUGGESTIONS = [
 function chatErrorMessage(error: Error, roomNumber: string): string {
   const message = error.message.trim();
   if (roomNumber === "guest" || message.includes("OPENAI_API_KEY") || message.includes("AI concierge")) {
-    return "AI-conciergen kunde inte svara. Kontrollera att OPENAI_API_KEY finns i .env och starta om Docker.";
+    return "AI-conciergen kunde inte svara. Kontrollera OpenAI API-nyckel, billing och quota i OpenAI Platform.";
   }
 
   return "Något gick fel. Försök igen om en stund.";
