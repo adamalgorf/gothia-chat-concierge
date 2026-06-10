@@ -26,6 +26,12 @@ export async function saveGuestTransaction(input: SaveGuestTransactionInput) {
     .single();
 
   if (error) {
+    console.error("[Transactions] Failed to save guest transaction", {
+      roomNumber: input.roomNumber,
+      transactionType: input.transactionType,
+      status: input.status ?? "pending",
+      error,
+    });
     return { ok: false as const, message: "Kunde inte registrera." };
   }
 
