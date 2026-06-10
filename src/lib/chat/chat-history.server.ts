@@ -1,4 +1,5 @@
 import type { UIMessage } from "ai";
+import { ensureCoreHotelSchema, postgres } from "@/lib/db/postgres.server";
 
 export function extractTextFromMessage(message: UIMessage | undefined): string {
   if (!message) return "";
@@ -16,29 +17,25 @@ export async function saveChatMessage(input: {
 }) {
   if (!input.content.trim()) return;
 
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { error } = await supabaseAdmin.from("chat_messages").insert({
-    room_number: input.roomNumber,
-    role: input.role,
-    content: input.content,
-  });
+  try {
+    await ensureCoreHotelSchema();
+    const sql = postgres();
+    await sql`
+      INSERT INTO public.chat_messages (room_number, role, content)
+      VALUES (${input.roomNumber}, ${input.role}, ${input.content})
+    `;
 
-  if (error) {
+    console.info("[ChatHistory] Saved chat message", {
+      roomNumber: input.roomNumber,
+      role: input.role,
+    });
+  } catch (error) {
     console.error("[ChatHistory] Failed to save chat message", {
       roomNumber: input.roomNumber,
       role: input.role,
-      message: error.message,
-      code: error.code,
-      details: error.details,
-      hint: error.hint,
+      error,
     });
-    return;
   }
-
-  console.info("[ChatHistory] Saved chat message", {
-    roomNumber: input.roomNumber,
-    role: input.role,
-  });
 }
 
 export async function saveLastUserMessage(input: { roomNumber: string; messages: UIMessage[] }) {

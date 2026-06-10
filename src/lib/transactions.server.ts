@@ -1,3 +1,5 @@
+import { ensureCoreHotelSchema, postgres } from "@/lib/db/postgres.server";
+
 type JsonRecord = Record<string, unknown>;
 
 export type TransactionType = "WORK_REQUEST" | "DEBITERA_MINIBAR" | "HOTEL_SERVICE";
@@ -39,20 +41,39 @@ export async function saveGuestTransaction(input: SaveGuestTransactionInput) {
     detailsPreview: input.details.slice(0, 160),
   });
 
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data, error } = await supabaseAdmin
-    .from("guest_transactions")
-    .insert({
-      room_number: input.roomNumber,
+  await ensureCoreHotelSchema();
+  const sql = postgres();
+
+  try {
+    const rows = await sql<{ id: string }>`
+      INSERT INTO public.guest_transactions (room_number, transaction_type, details, items, status)
+      VALUES (
+        ${input.roomNumber},
+        ${input.transactionType},
+        ${input.details},
+        ${JSON.stringify(input.items ?? [])}::jsonb,
+        ${input.status ?? "pending"}
+      )
+      RETURNING id
+    `;
+    const id = rows[0]?.id;
+    if (!id) throw new Error("Insert returned no transaction id.");
+
+    console.info("[Transactions] Saved guest transaction", {
+      id,
+      roomNumber: input.roomNumber,
+      transactionType: input.transactionType,
+    });
+
+    return {
+      ok: true as const,
+      id,
       transaction_type: input.transactionType,
       details: input.details,
-      items: (input.items ?? []) as unknown as never,
-      status: input.status ?? "pending",
-    })
-    .select("id")
-    .single();
-
-  if (error) {
+      items: input.items ?? [],
+      confirmation: input.confirmation,
+    };
+  } catch (error) {
     console.error("[Transactions] Failed to save guest transaction", {
       roomNumber: input.roomNumber,
       transactionType: input.transactionType,
@@ -61,19 +82,4 @@ export async function saveGuestTransaction(input: SaveGuestTransactionInput) {
     });
     return { ok: false as const, message: "Kunde inte registrera." };
   }
-
-  console.info("[Transactions] Saved guest transaction", {
-    id: data.id,
-    roomNumber: input.roomNumber,
-    transactionType: input.transactionType,
-  });
-
-  return {
-    ok: true as const,
-    id: data.id,
-    transaction_type: input.transactionType,
-    details: input.details,
-    items: input.items ?? [],
-    confirmation: input.confirmation,
-  };
 }
