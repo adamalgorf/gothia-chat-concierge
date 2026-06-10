@@ -11,6 +11,26 @@ export interface SaveGuestTransactionInput {
   confirmation: string;
 }
 
+function describeError(error: unknown) {
+  if (!error || typeof error !== "object") {
+    return { raw: String(error) };
+  }
+
+  const record = error as Record<string, unknown>;
+  return {
+    name: record.name,
+    message: record.message,
+    code: record.code,
+    details: record.details,
+    hint: record.hint,
+    status: record.status,
+    statusCode: record.statusCode,
+    propertyNames: Object.getOwnPropertyNames(error),
+    json: JSON.stringify(error),
+    stringValue: String(error),
+  };
+}
+
 export async function saveGuestTransaction(input: SaveGuestTransactionInput) {
   console.info("[Transactions] Saving guest transaction", {
     roomNumber: input.roomNumber,
@@ -37,10 +57,7 @@ export async function saveGuestTransaction(input: SaveGuestTransactionInput) {
       roomNumber: input.roomNumber,
       transactionType: input.transactionType,
       status: input.status ?? "pending",
-      errorMessage: error.message,
-      errorCode: error.code,
-      errorDetails: error.details,
-      errorHint: error.hint,
+      error: describeError(error),
     });
     return { ok: false as const, message: "Kunde inte registrera." };
   }
