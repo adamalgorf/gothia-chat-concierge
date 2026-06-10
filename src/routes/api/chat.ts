@@ -30,7 +30,12 @@ export const Route = createFileRoute("/api/chat")({
         }
 
         const key = process.env.OPENAI_API_KEY;
-        if (!key) return new Response("Missing OPENAI_API_KEY", { status: 500 });
+        if (!key) {
+          return new Response("AI concierge saknar OPENAI_API_KEY. Lägg till nyckeln i .env och starta om Docker.", {
+            status: 503,
+            headers: { "content-type": "text/plain; charset=utf-8" },
+          });
+        }
 
         if (!isGuest) {
           await saveLastUserMessage({ roomNumber, messages });

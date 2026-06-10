@@ -40,6 +40,14 @@ const SUGGESTIONS = [
   "Boka taxi kl 18:00",
 ];
 
+function chatErrorMessage(error: Error, roomNumber: string): string {
+  const message = error.message.trim();
+  if (roomNumber === "guest" || message.includes("OPENAI_API_KEY") || message.includes("AI concierge")) {
+    return "AI-conciergen kunde inte svara. Kontrollera att OPENAI_API_KEY finns i .env och starta om Docker.";
+  }
+
+  return "Något gick fel. Försök igen om en stund.";
+}
 
 export function GuestChat({ roomNumber, initialMessages, onBookingConfirmed, autoPrompt }: GuestChatProps) {
   const roomRef = useRef(roomNumber);
@@ -248,7 +256,7 @@ export function GuestChat({ roomNumber, initialMessages, onBookingConfirmed, aut
 
           {error && (
             <div className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-xs text-destructive">
-              Något gick fel. Försök igen om en stund.
+              {chatErrorMessage(error, roomNumber)}
             </div>
           )}
         </div>
