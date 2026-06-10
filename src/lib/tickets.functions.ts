@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { ensureCoreHotelSchema, postgres } from "@/lib/db/postgres.server";
 
 const STAFF = ["Anna", "Erik", "Sara", "Johan", "Maja"] as const;
 
@@ -20,14 +21,15 @@ export type Ticket = {
 };
 
 export const listTickets = createServerFn({ method: "GET" }).handler(async (): Promise<Ticket[]> => {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data, error } = await supabaseAdmin
-    .from("guest_transactions")
-    .select("id, room_number, transaction_type, details, items, status, assigned_to, created_at, updated_at")
-    .order("created_at", { ascending: false })
-    .limit(200);
-  if (error) throw new Error(error.message);
-  return (data ?? []).map((r) => ({
+  await ensureCoreHotelSchema();
+  const sql = postgres();
+  const rows = await sql<Ticket>`
+    SELECT id, room_number, transaction_type, details, items, status, assigned_to, created_at, updated_at
+    FROM public.guest_transactions
+    ORDER BY created_at DESC
+    LIMIT 200
+  `;
+  return rows.map((r) => ({
     id: r.id,
     room_number: r.room_number,
     transaction_type: r.transaction_type,
@@ -50,14 +52,14 @@ const UpdateSchema = z.object({
 export const updateTicket = createServerFn({ method: "POST" })
   .validator((data: unknown) => UpdateSchema.parse(data))
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const patch: { status?: string; assigned_to?: string | null } = {};
-    if (data.status !== undefined) patch.status = data.status;
-    if (data.assigned_to !== undefined) patch.assigned_to = data.assigned_to;
-    const { error } = await supabaseAdmin
-      .from("guest_transactions")
-      .update(patch)
-      .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    await ensureCoreHotelSchema();
+    const sql = postgres();
+    await sql`
+      UPDATE public.guest_transactions
+      SET
+        status = COALESCE(${data.status ?? null}, status),
+        assigned_to = COALESCE(${data.assigned_to ?? null}, assigned_to)
+      WHERE id = ${data.id}
+    `;
     return { ok: true };
   });
