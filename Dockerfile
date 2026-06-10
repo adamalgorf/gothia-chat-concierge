@@ -26,6 +26,7 @@ ENV PORT=3000
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
+COPY docker/serve-production.ts ./serve-production.ts
 
 EXPOSE 3000
-CMD ["bun", "dist/server/server.js"]
+CMD ["bun", "serve-production.ts"]
