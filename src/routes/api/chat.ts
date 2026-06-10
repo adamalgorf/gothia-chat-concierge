@@ -49,19 +49,45 @@ export const Route = createFileRoute("/api/chat")({
         const roomNumber = isGuest ? "guest" : raw;
 
         if (!Array.isArray(messages) || (!isGuest && !/^[0-9]{2,6}$/.test(roomNumber))) {
+          console.warn("[Chat API] Rejected bad chat request", {
+            hasMessagesArray: Array.isArray(messages),
+            rawRoomNumber: raw,
+            resolvedRoomNumber: roomNumber,
+            isGuest,
+          });
           return new Response("Bad request", { status: 400 });
         }
 
+        console.info("[Chat API] Received chat request", {
+          roomNumber,
+          isGuest,
+          messageCount: messages.length,
+          hasOpenAiKey: Boolean(process.env.OPENAI_API_KEY),
+          supabaseUrl: process.env.SUPABASE_URL ?? null,
+          hasSupabaseServiceRoleKey: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
+        });
+
         if (!isGuest) {
+          console.info("[Chat API] Saving latest user chat message", { roomNumber });
           await saveLastUserMessage({ roomNumber, messages });
 
           const lastUserMessage = [...messages].reverse().find((message) => message.role === "user");
+          const lastUserText = extractTextFromMessage(lastUserMessage);
+          console.info("[Chat API] Checking for deterministic service request", {
+            roomNumber,
+            messagePreview: lastUserText.slice(0, 160),
+          });
           const serviceRequest = detectInHouseServiceRequest({
-            text: extractTextFromMessage(lastUserMessage),
+            text: lastUserText,
             roomNumber,
           });
 
           if (serviceRequest) {
+            console.info("[Chat API] Deterministic service request matched", {
+              roomNumber,
+              transactionType: serviceRequest.transactionType,
+              detailsPreview: serviceRequest.details.slice(0, 160),
+            });
             const saved = await saveGuestTransaction({
               roomNumber,
               transactionType: serviceRequest.transactionType,
@@ -79,12 +105,22 @@ export const Route = createFileRoute("/api/chat")({
               content: reply,
             });
 
+            console.info("[Chat API] Returning deterministic service response", {
+              roomNumber,
+              saved: saved.ok,
+            });
             return createTextStreamResponse(reply);
           }
+
+          console.info("[Chat API] No deterministic service request, falling through to AI", { roomNumber });
         }
 
         const key = process.env.OPENAI_API_KEY;
         if (!key) {
+          console.warn("[Chat API] Missing OPENAI_API_KEY for non-deterministic chat request", {
+            roomNumber,
+            isGuest,
+          });
           return new Response("AI concierge saknar OPENAI_API_KEY. Lägg till nyckeln i .env och starta om Docker.", {
             status: 503,
             headers: { "content-type": "text/plain; charset=utf-8" },

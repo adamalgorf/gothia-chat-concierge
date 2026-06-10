@@ -12,6 +12,13 @@ export interface SaveGuestTransactionInput {
 }
 
 export async function saveGuestTransaction(input: SaveGuestTransactionInput) {
+  console.info("[Transactions] Saving guest transaction", {
+    roomNumber: input.roomNumber,
+    transactionType: input.transactionType,
+    status: input.status ?? "pending",
+    detailsPreview: input.details.slice(0, 160),
+  });
+
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data, error } = await supabaseAdmin
     .from("guest_transactions")
@@ -30,10 +37,19 @@ export async function saveGuestTransaction(input: SaveGuestTransactionInput) {
       roomNumber: input.roomNumber,
       transactionType: input.transactionType,
       status: input.status ?? "pending",
-      error,
+      errorMessage: error.message,
+      errorCode: error.code,
+      errorDetails: error.details,
+      errorHint: error.hint,
     });
     return { ok: false as const, message: "Kunde inte registrera." };
   }
+
+  console.info("[Transactions] Saved guest transaction", {
+    id: data.id,
+    roomNumber: input.roomNumber,
+    transactionType: input.transactionType,
+  });
 
   return {
     ok: true as const,
