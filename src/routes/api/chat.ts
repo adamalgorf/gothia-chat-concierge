@@ -35,6 +35,46 @@ function createTextStreamResponse(text: string): Response {
   });
 }
 
+async function createAiServiceConfirmationResponse(input: {
+  apiKey: string;
+  roomNumber: string;
+  guestMessage: string;
+  registeredDetails: string;
+}) {
+  const openai = createOpenAiProvider(input.apiKey, process.env.OPENAI_BASE_URL);
+  const model = openai(process.env.OPENAI_MODEL ?? "gpt-5.2");
+  const result = streamText({
+    model,
+    system: [
+      "Du är Gothia Towers virtuella AI-concierge.",
+      "Gästens serviceärende är redan registrerat i hotellets interna system.",
+      "Svara varmt, tydligt och professionellt på svenska om gästen skrev svenska, annars på gästens språk.",
+      "Bekräfta exakt vad som är registrerat, vilket rum det gäller, och att personalen ser ärendet i internal-vyn.",
+      "Lova inte en exakt leveranstid. Säg hellre att personalen tar hand om det så snart som möjligt.",
+      "Ställ inte följdfrågor för enkla ärenden som handdukar, kuddar, städning eller enklare service.",
+    ].join("\n"),
+    prompt: [
+      `Rum: ${input.roomNumber}`,
+      `Gästens meddelande: ${input.guestMessage}`,
+      `Registrerat ärende: ${input.registeredDetails}`,
+      "",
+      "Skriv en kort men utförlig bekräftelse till gästen.",
+    ].join("\n"),
+  });
+
+  return result.toUIMessageStreamResponse({
+    onFinish: async ({ responseMessage }) => {
+      const text = extractTextFromMessage(responseMessage);
+      if (!text) return;
+      await saveChatMessage({
+        roomNumber: input.roomNumber,
+        role: "assistant",
+        content: text,
+      });
+    },
+  });
+}
+
 export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
@@ -66,6 +106,8 @@ export const Route = createFileRoute("/api/chat")({
           supabaseUrl: process.env.SUPABASE_URL ?? null,
           hasSupabaseServiceRoleKey: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
         });
+
+        const key = process.env.OPENAI_API_KEY;
 
         if (!isGuest) {
           console.info("[Chat API] Saving latest user chat message", { roomNumber });
@@ -99,6 +141,19 @@ export const Route = createFileRoute("/api/chat")({
               ? serviceRequest.confirmation
               : "Jag kunde inte registrera ärendet just nu. Försök igen om en stund.";
 
+            if (saved.ok && key) {
+              console.info("[Chat API] Returning AI-written service confirmation", {
+                roomNumber,
+                transactionType: serviceRequest.transactionType,
+              });
+              return createAiServiceConfirmationResponse({
+                apiKey: key,
+                roomNumber,
+                guestMessage: lastUserText,
+                registeredDetails: serviceRequest.details,
+              });
+            }
+
             await saveChatMessage({
               roomNumber,
               role: "assistant",
@@ -115,7 +170,6 @@ export const Route = createFileRoute("/api/chat")({
           console.info("[Chat API] No deterministic service request, falling through to AI", { roomNumber });
         }
 
-        const key = process.env.OPENAI_API_KEY;
         if (!key) {
           console.warn("[Chat API] Missing OPENAI_API_KEY for non-deterministic chat request", {
             roomNumber,

@@ -9,7 +9,6 @@ export interface DetectedServiceRequest {
 const HOUSEKEEPING_PATTERNS = [
   /handduk/i,
   /kudd/i,
-  /täcke/i,
   /t[aä]cke/i,
   /lakan/i,
   /st[aä]d/i,
@@ -64,6 +63,16 @@ function normalizeDetails(text: string, roomNumber: string): string {
     : `Rum ${roomNumber}: ${cleanText}`;
 }
 
+function buildConfirmation(input: { roomNumber: string; details: string; title: string }): string {
+  return [
+    `Tack, jag har registrerat ett ${input.title} för rum ${input.roomNumber}.`,
+    "",
+    `**Registrerat:** ${input.details}`,
+    "",
+    "Ärendet är skickat till internal-vyn så personalen kan ta hand om det. Du behöver inte göra något mer just nu.",
+  ].join("\n");
+}
+
 export function detectInHouseServiceRequest(input: {
   text: string;
   roomNumber: string;
@@ -81,10 +90,15 @@ export function detectInHouseServiceRequest(input: {
       roomNumber: input.roomNumber,
       messagePreview: text.slice(0, 120),
     });
+    const details = normalizeDetails(text, input.roomNumber);
     return {
       transactionType: "DEBITERA_MINIBAR",
-      details: normalizeDetails(text, input.roomNumber),
-      confirmation: "Jag har registrerat minibarärendet för rummet. Personalen ser det i internal-vyn.",
+      details,
+      confirmation: buildConfirmation({
+        roomNumber: input.roomNumber,
+        details,
+        title: "minibarärende",
+      }),
     };
   }
 
@@ -96,10 +110,15 @@ export function detectInHouseServiceRequest(input: {
       roomNumber: input.roomNumber,
       messagePreview: text.slice(0, 120),
     });
+    const details = normalizeDetails(text, input.roomNumber);
     return {
       transactionType: "WORK_REQUEST",
-      details: normalizeDetails(text, input.roomNumber),
-      confirmation: "Jag har skapat ett serviceärende för rummet. Personalen ser det i internal-vyn.",
+      details,
+      confirmation: buildConfirmation({
+        roomNumber: input.roomNumber,
+        details,
+        title: "serviceärende",
+      }),
     };
   }
 
@@ -109,3 +128,4 @@ export function detectInHouseServiceRequest(input: {
   });
   return null;
 }
+
