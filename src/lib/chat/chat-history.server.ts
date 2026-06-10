@@ -17,10 +17,27 @@ export async function saveChatMessage(input: {
   if (!input.content.trim()) return;
 
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  await supabaseAdmin.from("chat_messages").insert({
+  const { error } = await supabaseAdmin.from("chat_messages").insert({
     room_number: input.roomNumber,
     role: input.role,
     content: input.content,
+  });
+
+  if (error) {
+    console.error("[ChatHistory] Failed to save chat message", {
+      roomNumber: input.roomNumber,
+      role: input.role,
+      message: error.message,
+      code: error.code,
+      details: error.details,
+      hint: error.hint,
+    });
+    return;
+  }
+
+  console.info("[ChatHistory] Saved chat message", {
+    roomNumber: input.roomNumber,
+    role: input.role,
   });
 }
 
