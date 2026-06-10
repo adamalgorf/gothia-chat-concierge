@@ -15,11 +15,11 @@ import {
   type RoomTypeId,
 } from "@/lib/booking/booking-pricing";
 import {
-  assignDemoRoom,
   deriveRoomPin,
   formatCardExpiryInput,
   formatCardNumberInput,
   normalizeCardNumber,
+  resolveCheckInRoom,
   validateCheckInForm,
   validatePaymentCard,
   validateRoomNumber,
@@ -62,6 +62,7 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
     key: Key,
     value: (typeof bookingQuoteInput)[Key],
   ) => {
+    setError(null);
     setBookingQuoteInput((current) => ({ ...current, [key]: value }));
   };
 
@@ -77,7 +78,7 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
     const trimmedPhone = guestPhone.trim();
 
     const validationError = validateCheckInForm({
-      bookingReference: trimmedBooking,
+      roomOrBookingReference: trimmedBooking,
       guestName: trimmedName,
       guestEmail: trimmedEmail,
       guestPhone: trimmedPhone,
@@ -89,7 +90,7 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
     }
     setError(null);
 
-    const room = assignDemoRoom(trimmedBooking);
+    const room = resolveCheckInRoom(trimmedBooking);
 
     setIsSaving(true);
     try {
@@ -332,15 +333,18 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
                   htmlFor="booking"
                   className="block text-[10px] font-medium uppercase tracking-[0.35em] text-foreground/60"
                 >
-                  Bokningsnummer eller efternamn
+                  Rumsnummer eller bokningsnummer
                 </label>
                 <input
                   id="booking"
                   type="text"
                   autoFocus
                   value={booking}
-                  onChange={(e) => setBooking(e.target.value)}
-                  placeholder="GT-48201 / Andersson"
+                  onChange={(e) => {
+                    setError(null);
+                    setBooking(e.target.value);
+                  }}
+                  placeholder="1204 / GT-48201"
                   className="mt-2 w-full rounded-xl border border-foreground/25 bg-foreground/5 px-5 py-3.5 font-display text-base text-foreground backdrop-blur-md placeholder:text-foreground/30 focus:border-gold focus:outline-none"
                 />
               </div>
@@ -355,7 +359,10 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
                     type="text"
                     autoComplete="name"
                     value={guestName}
-                    onChange={(e) => setGuestName(e.target.value)}
+                    onChange={(e) => {
+                      setError(null);
+                      setGuestName(e.target.value);
+                    }}
                     placeholder="Anna Andersson"
                     className="mt-2 w-full rounded-xl border border-foreground/25 bg-foreground/5 px-5 py-3.5 text-base text-foreground backdrop-blur-md placeholder:text-foreground/30 focus:border-gold focus:outline-none"
                   />
@@ -369,7 +376,10 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
                     type="email"
                     autoComplete="email"
                     value={guestEmail}
-                    onChange={(e) => setGuestEmail(e.target.value)}
+                    onChange={(e) => {
+                      setError(null);
+                      setGuestEmail(e.target.value);
+                    }}
                     placeholder="anna@exempel.se"
                     className="mt-2 w-full rounded-xl border border-foreground/25 bg-foreground/5 px-5 py-3.5 text-base text-foreground backdrop-blur-md placeholder:text-foreground/30 focus:border-gold focus:outline-none"
                   />
@@ -383,7 +393,10 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
                     type="tel"
                     autoComplete="tel"
                     value={guestPhone}
-                    onChange={(e) => setGuestPhone(e.target.value)}
+                    onChange={(e) => {
+                      setError(null);
+                      setGuestPhone(e.target.value);
+                    }}
                     placeholder="+46 70 123 45 67"
                     className="mt-2 w-full rounded-xl border border-foreground/25 bg-foreground/5 px-5 py-3.5 text-base text-foreground backdrop-blur-md placeholder:text-foreground/30 focus:border-gold focus:outline-none"
                   />
@@ -508,7 +521,10 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
                   inputMode="numeric"
                   autoFocus
                   value={checkOutRoom}
-                  onChange={(e) => setCheckOutRoom(e.target.value.replace(/\D/g, ""))}
+                  onChange={(e) => {
+                    setError(null);
+                    setCheckOutRoom(e.target.value.replace(/\D/g, ""));
+                  }}
                   placeholder="1204"
                   className="flex-1 rounded-full border border-foreground/25 bg-foreground/5 px-6 py-4 font-display text-2xl tracking-[0.3em] text-foreground backdrop-blur-md placeholder:text-foreground/30 focus:border-gold focus:outline-none"
                 />
@@ -735,7 +751,10 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
                       type="text"
                       autoComplete="cc-name"
                       value={cardName}
-                      onChange={(e) => setCardName(e.target.value)}
+                      onChange={(e) => {
+                        setError(null);
+                        setCardName(e.target.value);
+                      }}
                       placeholder="Anna Andersson"
                       className="mt-1 w-full rounded-xl border border-foreground/25 bg-background/40 px-4 py-3 text-base text-foreground placeholder:text-foreground/30 focus:border-gold focus:outline-none"
                     />
@@ -752,7 +771,10 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
                       autoComplete="cc-number"
                       maxLength={23}
                       value={cardNumber}
-                      onChange={(e) => setCardNumber(formatCardNumberInput(e.target.value))}
+                      onChange={(e) => {
+                        setError(null);
+                        setCardNumber(formatCardNumberInput(e.target.value));
+                      }}
                       placeholder="4242 4242 4242 4242"
                       className="mt-1 w-full rounded-xl border border-foreground/25 bg-background/40 px-4 py-3 font-display tracking-[0.15em] text-foreground placeholder:text-foreground/30 focus:border-gold focus:outline-none"
                     />
@@ -770,7 +792,10 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
                         autoComplete="cc-exp"
                         maxLength={5}
                         value={cardExpiry}
-                        onChange={(e) => setCardExpiry(formatCardExpiryInput(e.target.value))}
+                        onChange={(e) => {
+                          setError(null);
+                          setCardExpiry(formatCardExpiryInput(e.target.value));
+                        }}
                         placeholder="07/27"
                         className="mt-1 w-full rounded-xl border border-foreground/25 bg-background/40 px-4 py-3 text-foreground placeholder:text-foreground/30 focus:border-gold focus:outline-none"
                       />
@@ -786,7 +811,10 @@ export function CheckIn({ storedRoom, onCheckIn, onGuestMode, onContinue, onChec
                         autoComplete="cc-csc"
                         maxLength={4}
                         value={cardCvc}
-                        onChange={(e) => setCardCvc(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                        onChange={(e) => {
+                          setError(null);
+                          setCardCvc(e.target.value.replace(/\D/g, "").slice(0, 4));
+                        }}
                         placeholder="123"
                         className="mt-1 w-full rounded-xl border border-foreground/25 bg-background/40 px-4 py-3 text-foreground placeholder:text-foreground/30 focus:border-gold focus:outline-none"
                       />

@@ -1,5 +1,5 @@
 export interface CheckInFormInput {
-  bookingReference: string;
+  roomOrBookingReference: string;
   guestName: string;
   guestEmail: string;
   guestPhone: string;
@@ -25,9 +25,18 @@ export function assignDemoRoom(bookingReference: string): string {
   return `${floor}${number}`;
 }
 
+export function resolveCheckInRoom(roomOrBookingReference: string): string {
+  return /^[0-9]{2,6}$/.test(roomOrBookingReference)
+    ? roomOrBookingReference
+    : assignDemoRoom(roomOrBookingReference);
+}
+
 export function validateCheckInForm(input: CheckInFormInput): string | null {
-  if (input.bookingReference.length < 3) {
-    return "Ange ditt bokningsnummer eller efternamn (minst 3 tecken).";
+  const isRoomNumber = /^[0-9]{2,6}$/.test(input.roomOrBookingReference);
+  const isBookingReference = /^(?=.*[0-9])[A-Za-z0-9-]{3,64}$/.test(input.roomOrBookingReference);
+
+  if (!isRoomNumber && !isBookingReference) {
+    return "Ange rumsnummer (2–6 siffror) eller bokningsnummer.";
   }
 
   if (input.guestName.length < 2) {
